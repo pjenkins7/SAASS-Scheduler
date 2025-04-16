@@ -23,6 +23,7 @@ def run_scheduler(df, email):
     max_interaction = 4
     penalty_threshold = 3
     penalty_weight = 0.25
+    time_limit = 20
 
     course_numbers = [601, 600, 627, 632, 628, 633, 644, 667, 665, 660]
 
@@ -93,7 +94,7 @@ def run_scheduler(df, email):
 
         solver_manager = SolverManagerFactory('neos')
         solver = SolverFactory('cplex')
-        solver.options['timelimit'] = 600
+        solver.options['timelimit'] = time_limit
         solver_manager.solve(model, opt=solver, tee=False)
 
         courseGroups = {g: [] for g in groups}
