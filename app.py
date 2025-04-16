@@ -115,11 +115,9 @@ if email and st.session_state.uploaded and st.session_state.opt_run:
                 df,
                 email,
                 progress_callback=show_step,
-                progress_bar=progress_bar
+                progress_bar=progress_bar,
+                output_filename=output_filename
             )
-
-            # Rename to timestamped output
-            os.rename("SAASS_Scheduler_Summary.xlsx", output_filename)
 
             status.update(label="✅ Optimization complete!", state="complete")
             st.session_state.opt_run = False
