@@ -67,6 +67,15 @@ if "uploaded" not in st.session_state:
 if uploaded_file:
     st.session_state.uploaded = uploaded_file
 
+# ✅ Run-time Disclaimer
+st.warning("""
+⏳ **Important Note:**  
+Each course optimization is submitted to the [NEOS Server](https://neos-server.org), which may take up to **10 minutes per course**.  
+This scheduler solves **10 courses sequentially**, so the total runtime may take up to **2 hours**.
+
+We recommend starting the process and returning later to download your results once complete.
+""")
+
 # ✅ Buttons in a row
 col1, col2 = st.columns([1, 1])
 
