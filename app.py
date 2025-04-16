@@ -39,7 +39,7 @@ Upload a `.csv` file with the following **two columns**, with these exact header
 - 🚫 Do **not** include extra columns or leave blank rows.
 - ✅ An **email address is required**, as the NEOS server uses it to process the optimization job.
 
-🧠 **Why it matters:**  
+**Why it matters:**  
 The optimization model enforces a constraint that **no more than two members with the same AFSC or job title** can be assigned to a single group. Inconsistent or misspelled entries will bypass this constraint and reduce solution quality.
 """)
 
