@@ -29,6 +29,7 @@ def run_scheduler(df, email, progress_callback=None, progress_bar=None):
 
     course_numbers = [601, 600, 627, 632, 628, 633, 644, 667, 665, 660]
     assignment_rows = []
+    summary_stats_rows = []
 
     for i, course_num in enumerate(course_numbers):
         if progress_callback:
@@ -84,14 +85,9 @@ def run_scheduler(df, email, progress_callback=None, progress_bar=None):
                     for g in groups:
                         model.cap_limit.add(model.w[i, j, g] == 0)
 
-        # solver_manager = SolverManagerFactory('neos')
-        # solver = SolverFactory('cplex')
-        # solver.options['timelimit'] = time_limit
-        # solver_manager.solve(model, opt=solver, tee=False)
         solver_manager = SolverManagerFactory('neos')
         solver = SolverFactory('cplex')
         solver_manager.solve(model, opt=solver, tee=False, options={"timelimit": time_limit})
-
 
         courseGroups = {g: [] for g in groups}
         for s in students:
@@ -116,29 +112,29 @@ def run_scheduler(df, email, progress_callback=None, progress_bar=None):
                     "AFSC": student_afscs[s]
                 })
 
-    # Final summary stats
-    pairwiseCounts = interaction_matrix[np.triu_indices(num_students, k=1)]
-    studentTotals = np.sum(interaction_matrix > 0, axis=1)
-    summary_stats = {
-        "Unmet Pairs": np.sum(pairwiseCounts == 0),
-        "Max Pairwise": np.max(pairwiseCounts),
-        "Pairs at Cap": np.sum(pairwiseCounts >= max_interaction),
-        "Min Student": np.min(studentTotals),
-        "Max Student": np.max(studentTotals),
-        "Avg Student": round(np.mean(studentTotals), 2),
-        "Median": np.median(studentTotals),
-        "Fully Paired": np.sum(studentTotals == (num_students - 1))
-    }
+        # Capture stats for this course
+        pairwiseCounts = interaction_matrix[np.triu_indices(num_students, k=1)]
+        studentTotals = np.sum(interaction_matrix > 0, axis=1)
+        summary_stats_rows.append({
+            "Course": course_num,
+            "Unmet Pairs": np.sum(pairwiseCounts == 0),
+            "Max Pairwise": np.max(pairwiseCounts),
+            "Pairs at Cap": np.sum(pairwiseCounts >= max_interaction),
+            "Min Student": np.min(studentTotals),
+            "Max Student": np.max(studentTotals),
+            "Avg Student": round(np.mean(studentTotals), 2),
+            "Median": np.median(studentTotals),
+            "Fully Paired": np.sum(studentTotals == (num_students - 1))
+        })
 
     with pd.ExcelWriter("Scheduler_Summary.xlsx", engine='xlsxwriter') as writer:
-        df1 = pd.DataFrame(assignment_rows)
-        df1.to_excel(writer, sheet_name="Summary", index=False)
-        pd.DataFrame([summary_stats]).to_excel(writer, sheet_name="Summary", startrow=len(df1) + 2, index=False)
+        pd.DataFrame(assignment_rows).to_excel(writer, sheet_name="Summary", index=False)
+        pd.DataFrame(summary_stats_rows).to_excel(writer, sheet_name="Course Stats", index=False)
         pd.DataFrame(interaction_matrix, columns=student_names, index=student_names).to_excel(
             writer, sheet_name="Interaction Matrix"
         )
 
-    # Save final visuals
+    # Final visuals
     fig, ax = plt.subplots(figsize=(12, 10))
     im = ax.imshow(interaction_matrix, cmap='Reds', vmin=0, vmax=max_interaction)
     for i in range(num_students):
