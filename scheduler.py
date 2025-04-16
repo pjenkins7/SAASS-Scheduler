@@ -9,12 +9,11 @@ import os
 def run_scheduler(df, email):
     os.environ["NEOS_EMAIL"] = email
 
-    student_ids = df["Student Number"].tolist()
     student_afscs = df["AFSC"].tolist()
     student_names = df["Student Name"].tolist()
     unique_afscs = sorted(set(student_afscs))
 
-    num_students = len(student_ids)
+    num_students = len(student_names)
     students = range(num_students)
     groups = range(4)
     group_sizes = [12, 11, 11, 11]
