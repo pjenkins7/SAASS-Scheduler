@@ -87,12 +87,6 @@ with col1:
     if st.button("🚀 Start Optimization"):
         st.session_state.opt_run = True
 
-with col2:
-    if st.button("🔄 Reset App"):
-        st.session_state.opt_run = False
-        st.session_state.uploaded = None
-        st.experimental_rerun()
-
 # ✅ Run if ready and triggered
 if email and st.session_state.uploaded and st.session_state.opt_run:
     try:
