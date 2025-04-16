@@ -16,7 +16,7 @@ This tool assigns students to balanced course groups using optimization submitte
 
 ---
 
-### 📥 What You'll Need
+### What You'll Need
 
 Upload a `.csv` file with the following **two columns**, with these exact headers:
 
@@ -30,16 +30,16 @@ Upload a `.csv` file with the following **two columns**, with these exact header
 
 ---
 
-### ⚠️ Formatting Guidelines (Important)
+### Formatting Guidelines (Important)
 
-- ✅ **Student Name** must follow the format: `LastName-FirstInitial` (no spaces).
-- ✅ **AFSC** must be labeled **consistently**:
+- **Student Name** must follow the format: `LastName-FirstInitial` (no spaces).
+- **AFSC** must be labeled **consistently**:
   - If the student is **not** from the Air Force, use an appropriate identifier. For example: `"Marine"`, `"Army"`, or `"Civ"` (case-sensitive, spelled exactly).
   - Use consistent formatting for all AFSCs or job titles. For example, if you use `"15A"`, apply that format universally. Do **not** mix variants like `"15-A"`, `"15a"`, or `"Ops Research"`.
-- 🚫 Do **not** include extra columns or leave blank rows.
-- ✅ An **email address is required**, as the NEOS server uses it to process the optimization job.
+-  Do **not** include extra columns or leave blank rows.
+- An **email address is required**, as the NEOS server uses it to process the optimization job.
 
-🧠 **Why it matters:**  
+**Why it matters:**  
 The optimization model enforces a constraint that **no more than two members with the same AFSC or job title** can be assigned to a single group. Inconsistent or misspelled entries will bypass this constraint and reduce solution quality.
 """)
 
@@ -47,7 +47,7 @@ The optimization model enforces a constraint that **no more than two members wit
 if os.path.exists("sample_roster.csv"):
     with open("sample_roster.csv", "rb") as f:
         st.download_button(
-            label="📥 Download Example CSV File",
+            label=" Download Example CSV File",
             data=f,
             file_name="sample_roster.csv",
             mime="text/csv"
@@ -69,7 +69,7 @@ if uploaded_file:
 
 # ✅ Run-time Disclaimer
 st.warning("""
-⏳ **Important Note on Runtime**
+**Important Note on Runtime**
 
 Each course is submitted individually to the [NEOS Server](https://neos-server.org) using the CPLEX solver.  
 We have set a **10-minute time limit per course** to allow the solver to sufficiently explore the solution space and generate **high-quality (though not guaranteed optimal)** solutions.
