@@ -84,10 +84,14 @@ def run_scheduler(df, email, progress_callback=None, progress_bar=None):
                     for g in groups:
                         model.cap_limit.add(model.w[i, j, g] == 0)
 
+        # solver_manager = SolverManagerFactory('neos')
+        # solver = SolverFactory('cplex')
+        # solver.options['timelimit'] = time_limit
+        # solver_manager.solve(model, opt=solver, tee=False)
         solver_manager = SolverManagerFactory('neos')
         solver = SolverFactory('cplex')
-        solver.options['timelimit'] = time_limit
-        solver_manager.solve(model, opt=solver, tee=False)
+        solver_manager.solve(model, opt=solver, tee=False, options={"timelimit": time_limit})
+
 
         courseGroups = {g: [] for g in groups}
         for s in students:
