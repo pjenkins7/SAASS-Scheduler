@@ -69,12 +69,16 @@ if uploaded_file:
 
 # ✅ Run-time Disclaimer
 st.warning("""
-⏳ **Important Note:**  
-Each course optimization is submitted to the [NEOS Server](https://neos-server.org), which may take up to **10 minutes per course**.  
-This scheduler solves **10 courses sequentially**, so the total runtime may take up to **2 hours**.
+⏳ **Important Note on Runtime**
 
-We recommend starting the process and returning later to download your results once complete.
+Each course is submitted individually to the [NEOS Server](https://neos-server.org) using the CPLEX solver.  
+We have set a **10-minute time limit per course** to allow the solver to sufficiently explore the solution space and generate **high-quality (though not guaranteed optimal)** solutions.
+
+Since this scheduler runs for **10 courses sequentially**, total runtime may take up to **2 hours**.
+
+We recommend starting the optimization and **returning later** to download your results.
 """)
+
 
 # ✅ Buttons in a row
 col1, col2 = st.columns([1, 1])
