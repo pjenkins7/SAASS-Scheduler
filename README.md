@@ -8,8 +8,3 @@ This web-based tool allows users to upload SAASS student data, submit group sche
 - The app sends an optimization job to NEOS using the CPLEX solver.
 - You get downloadable results and visualizations.
 
-## Run Locally
-
-```bash
-pip install -r requirements.txt
-streamlit run app.py
