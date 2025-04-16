@@ -6,7 +6,7 @@ from pyomo.environ import *
 from pyomo.opt import SolverFactory, SolverManagerFactory
 import os
 
-def run_scheduler(df, email, progress_callback=None):
+def run_scheduler(df, email, progress_callback=None, progress_bar=None):
     os.environ["NEOS_EMAIL"] = email
 
     student_afscs = df["AFSC"].tolist()
@@ -28,12 +28,13 @@ def run_scheduler(df, email, progress_callback=None):
     time_limit = 20
 
     course_numbers = [601, 600, 627, 632, 628, 633, 644, 667, 665, 660]
-    summary_rows = []
     assignment_rows = []
 
-    for course_num in course_numbers:
+    for i, course_num in enumerate(course_numbers):
         if progress_callback:
             progress_callback(f"📘 Solving Course {course_num}...")
+        if progress_bar:
+            progress_bar.progress((i + 1) / len(course_numbers))
 
         delta = (interaction_matrix == 0).astype(int)
         penalize = (interaction_matrix >= penalty_threshold).astype(int)
@@ -111,13 +112,9 @@ def run_scheduler(df, email, progress_callback=None):
                     "AFSC": student_afscs[s]
                 })
 
-        # Summary statistics for this course (final ones are shown only once)
-        pairwiseCounts = interaction_matrix[np.triu_indices(num_students, k=1)]
-        studentTotals = np.sum(interaction_matrix > 0, axis=1)
-
-    # Save combined Excel sheet
-    summary_df = pd.DataFrame(assignment_rows)
-
+    # Final summary stats
+    pairwiseCounts = interaction_matrix[np.triu_indices(num_students, k=1)]
+    studentTotals = np.sum(interaction_matrix > 0, axis=1)
     summary_stats = {
         "Unmet Pairs": np.sum(pairwiseCounts == 0),
         "Max Pairwise": np.max(pairwiseCounts),
@@ -130,21 +127,14 @@ def run_scheduler(df, email, progress_callback=None):
     }
 
     with pd.ExcelWriter("AY26_Scheduler_Summary.xlsx", engine='xlsxwriter') as writer:
-        summary_df.to_excel(writer, sheet_name='Summary', index=False)
-
-        # Space row
-        spacer = pd.DataFrame([["", "", "", ""]], columns=summary_df.columns)
-        pd.concat([summary_df, spacer], ignore_index=True).to_excel(writer, sheet_name='Summary', index=False)
-
-        # Stats appended
-        pd.DataFrame([summary_stats]).to_excel(writer, sheet_name='Summary', startrow=len(summary_df) + 2, index=False)
-
-        # Final interaction matrix
+        df1 = pd.DataFrame(assignment_rows)
+        df1.to_excel(writer, sheet_name="Summary", index=False)
+        pd.DataFrame([summary_stats]).to_excel(writer, sheet_name="Summary", startrow=len(df1) + 2, index=False)
         pd.DataFrame(interaction_matrix, columns=student_names, index=student_names).to_excel(
             writer, sheet_name="Interaction Matrix"
         )
 
-    # Final visuals
+    # Save final visuals
     fig, ax = plt.subplots(figsize=(12, 10))
     im = ax.imshow(interaction_matrix, cmap='Reds', vmin=0, vmax=max_interaction)
     for i in range(num_students):
@@ -161,7 +151,6 @@ def run_scheduler(df, email, progress_callback=None):
     plt.savefig("Heatmap_Final.png")
     plt.close()
 
-    # Final bar chart
     fig, ax = plt.subplots(figsize=(10, 10))
     sorted_counts = np.sort(studentTotals)
     sorted_names = [student_names[i] for i in np.argsort(studentTotals)]
