@@ -16,7 +16,13 @@ def run_scheduler(df, email):
     num_students = len(student_names)
     students = range(num_students)
     groups = range(4)
-    group_sizes = [12, 11, 11, 11]
+    
+    # Evenly divide students across 4 groups
+    base_size = num_students // 4
+    extra = num_students % 4  # Distribute the remainder
+
+    # Build group sizes like [base+1, base+1, base, base] if extra = 2
+    group_sizes = [base_size + 1 if i < extra else base_size for i in range(4)]
 
     interaction_matrix = np.zeros((num_students, num_students), dtype=int)
     max_interaction = 4
