@@ -6,7 +6,7 @@ from pyomo.environ import *
 from pyomo.opt import SolverFactory, SolverManagerFactory
 import os
 
-def run_scheduler(df, email, progress_callback=None, progress_bar=None):
+def run_scheduler(df, email, progress_callback=None, progress_bar=None, output_filename="SAASS_Scheduler_Summary.xlsx"):
     os.environ["NEOS_EMAIL"] = email
 
     student_afscs = df["AFSC"].tolist()
@@ -128,7 +128,7 @@ def run_scheduler(df, email, progress_callback=None, progress_bar=None):
         })
 
     # ✅ Save Excel file with clean tabs
-    with pd.ExcelWriter("SAASS_Scheduler_Summary.xlsx", engine='xlsxwriter') as writer:
+    with pd.ExcelWriter(output_filename, engine='xlsxwriter') as writer:
         pd.DataFrame(assignment_rows).to_excel(writer, sheet_name="Summary", index=False)
         pd.DataFrame(summary_stats_rows).to_excel(writer, sheet_name="Course Stats", index=False)
         pd.DataFrame(interaction_matrix, columns=student_names, index=student_names).to_excel(
@@ -169,4 +169,5 @@ def run_scheduler(df, email, progress_callback=None, progress_bar=None):
     plt.savefig("InteractionBar_Final.png")
     plt.close()
 
-    return "SAASS_Scheduler_Summary.xlsx", course_numbers
+    return output_filename, course_numbers
+
