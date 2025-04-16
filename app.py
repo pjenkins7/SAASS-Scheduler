@@ -12,7 +12,8 @@ st.title("SAASS Scheduler (NEOS-Backed Optimization)")
 st.markdown("""
 Welcome to the **SAASS Scheduler**.
 
-This tool assigns students to balanced course groups using optimization submitted to the [NEOS Server](https://neos-server.org). 
+This tool assigns students to balanced course groups using optimization submitted to the [NEOS Server](https://neos-server.org).
+
 ---
 
 ### 📥 What You'll Need
@@ -22,10 +23,10 @@ Upload a `.csv` file with the following **two columns**, with these exact header
 | Student Name | AFSC |
 |--------------|------|
 | Jenkins-P    | 15A  |
-| Smith-J      | 11F  |
-| Brown-M      | Marine |
-| Taylor-A     | Civ  |
-| Carter-B     | Army |
+| Brown-D      | 21A  |
+| Taylor-J     | Civ  |
+| Jones-P      | Army |
+| Carter-X     | Marine |
 
 ---
 
@@ -33,22 +34,24 @@ Upload a `.csv` file with the following **two columns**, with these exact header
 
 - ✅ **Student Name** must follow the format: `LastName-FirstInitial` (no spaces).
 - ✅ **AFSC** must be labeled **consistently**:
-  - If the student is **not** from the Air Force, use an appropriate identifier. For example: `"Marine"`, `"Army"`, or `"Civ"` (case-sensitive, spelled exactly).  
+  - If the student is **not** from the Air Force, use an appropriate identifier. For example: `"Marine"`, `"Army"`, or `"Civ"` (case-sensitive, spelled exactly).
   - Use consistent formatting for all AFSCs or job titles. For example, if you use `"15A"`, apply that format universally. Do **not** mix variants like `"15-A"`, `"15a"`, or `"Ops Research"`.
 - 🚫 Do **not** include extra columns or leave blank rows.
 - ✅ An **email address is required**, as the NEOS server uses it to process the optimization job.
 
 🧠 **Why it matters:**  
 The optimization model enforces a constraint that **no more than two members with the same AFSC or job title** can be assigned to a single group. Inconsistent or misspelled entries will bypass this constraint and reduce solution quality.
-
----
-
-### 📄 Download a Sample CSV File
-
-Click below to download a sample roster for reference or testing:
-
-👉 [Download `sample_roster.csv`](https://raw.githubusercontent.com/pjenkins7/SAASS-Scheduler/main/sample_roster.csv)
 """)
+
+# ✅ Show download button for sample CSV
+if os.path.exists("sample_roster.csv"):
+    with open("sample_roster.csv", "rb") as f:
+        st.download_button(
+            label="📥 Download Example CSV File",
+            data=f,
+            file_name="sample_roster.csv",
+            mime="text/csv"
+        )
 
 # ---------------------------------------------------------
 # Step 1: Ask for email
