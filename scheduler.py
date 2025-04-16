@@ -127,6 +127,7 @@ def run_scheduler(df, email, progress_callback=None, progress_bar=None):
             "Fully Paired": np.sum(studentTotals == (num_students - 1))
         })
 
+    # ✅ Save Excel file with clean tabs
     with pd.ExcelWriter("Scheduler_Summary.xlsx", engine='xlsxwriter') as writer:
         pd.DataFrame(assignment_rows).to_excel(writer, sheet_name="Summary", index=False)
         pd.DataFrame(summary_stats_rows).to_excel(writer, sheet_name="Course Stats", index=False)
@@ -134,7 +135,7 @@ def run_scheduler(df, email, progress_callback=None, progress_bar=None):
             writer, sheet_name="Interaction Matrix"
         )
 
-    # Final visuals
+    # ✅ Save final heatmap
     fig, ax = plt.subplots(figsize=(12, 10))
     im = ax.imshow(interaction_matrix, cmap='Reds', vmin=0, vmax=max_interaction)
     for i in range(num_students):
@@ -151,6 +152,7 @@ def run_scheduler(df, email, progress_callback=None, progress_bar=None):
     plt.savefig("Heatmap_Final.png")
     plt.close()
 
+    # ✅ Save final interaction bar chart
     fig, ax = plt.subplots(figsize=(10, 10))
     sorted_counts = np.sort(studentTotals)
     sorted_names = [student_names[i] for i in np.argsort(studentTotals)]
