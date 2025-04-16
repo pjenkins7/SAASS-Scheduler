@@ -12,8 +12,7 @@ st.title("SAASS Scheduler (NEOS-Backed Optimization)")
 st.markdown("""
 Welcome to the **SAASS Scheduler**.
 
-This tool assigns students to balanced course groups using optimization submitted to the [NEOS Server](https://neos-server.org). It maximizes interaction diversity while ensuring no more than two students with the same AFSC/job title appear in the same group.
-
+This tool assigns students to balanced course groups using optimization submitted to the [NEOS Server](https://neos-server.org). 
 ---
 
 ### 📥 What You'll Need
@@ -32,15 +31,15 @@ Upload a `.csv` file with the following **two columns**, with these exact header
 
 ### ⚠️ Formatting Guidelines (Important)
 
-- ✅ **Student Name** must follow the format: `LastName-FirstInitial` (no spaces)
-- ✅ **AFSC/Job Titles** must be labeled **consistently**
-  - Use `"Marine"`, `"Army"`, or `"Civ"` (exact spelling and capitalization)
-  - Do not use abbreviations like `"civilian"` or `"mar"` — they must match exactly
-- 🚫 Do **not** include extra columns (e.g., `Student Number`) or blank rows
-- ✅ You must enter your **email address**, which is required for NEOS job submission
+- ✅ **Student Name** must follow the format: `LastName-FirstInitial` (no spaces).
+- ✅ **AFSC** must be labeled **consistently**:
+  - If the student is **not** from the Air Force, use an appropriate identifier. For example: `"Marine"`, `"Army"`, or `"Civ"` (case-sensitive, spelled exactly).  
+  - Use consistent formatting for all AFSCs or job titles. For example, if you use `"15A"`, apply that format universally. Do **not** mix variants like `"15-A"`, `"15a"`, or `"Ops Research"`.
+- 🚫 Do **not** include extra columns or leave blank rows.
+- ✅ An **email address is required**, as the NEOS server uses it to process the optimization job.
 
 🧠 **Why it matters:**  
-The optimization model limits each group to **no more than 2 members with the same AFSC/job title**. Inconsistent spelling will lead to incorrect constraints.
+The optimization model enforces a constraint that **no more than two members with the same AFSC or job title** can be assigned to a single group. Inconsistent or misspelled entries will bypass this constraint and reduce solution quality.
 
 ---
 
