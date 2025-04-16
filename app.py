@@ -108,7 +108,7 @@ if email and st.session_state.uploaded and st.session_state.opt_run:
 
             # Generate unique timestamped output name
             timestamp = datetime.now().strftime("%Y-%m-%d_%H%M")
-            output_filename = f"AY26_Scheduler_{timestamp}.xlsx"
+            output_filename = f"SAASS_Scheduler_{timestamp}.xlsx"
 
             # Run the scheduler
             output_file, _ = run_scheduler(
@@ -119,7 +119,7 @@ if email and st.session_state.uploaded and st.session_state.opt_run:
             )
 
             # Rename to timestamped output
-            os.rename("AY26_Scheduler_Summary.xlsx", output_filename)
+            os.rename("SAASS_Scheduler_Summary.xlsx", output_filename)
 
             status.update(label="✅ Optimization complete!", state="complete")
             st.session_state.opt_run = False
