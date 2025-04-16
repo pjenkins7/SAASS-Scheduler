@@ -54,7 +54,7 @@ if os.path.exists("sample_roster.csv"):
         )
 
 # ✅ Input fields
-email = st.text_input("Enter your NEOS email address:")
+email = st.text_input("Enter a valid email address:")
 uploaded_file = st.file_uploader("Upload the SAASS student roster CSV", type=["csv"])
 
 # ✅ Session state init
