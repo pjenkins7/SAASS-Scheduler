@@ -126,7 +126,7 @@ def run_scheduler(df, email, progress_callback=None, progress_bar=None):
         "Fully Paired": np.sum(studentTotals == (num_students - 1))
     }
 
-    with pd.ExcelWriter("AY26_Scheduler_Summary.xlsx", engine='xlsxwriter') as writer:
+    with pd.ExcelWriter("Scheduler_Summary.xlsx", engine='xlsxwriter') as writer:
         df1 = pd.DataFrame(assignment_rows)
         df1.to_excel(writer, sheet_name="Summary", index=False)
         pd.DataFrame([summary_stats]).to_excel(writer, sheet_name="Summary", startrow=len(df1) + 2, index=False)
@@ -167,4 +167,4 @@ def run_scheduler(df, email, progress_callback=None, progress_bar=None):
     plt.savefig("InteractionBar_Final.png")
     plt.close()
 
-    return "AY26_Scheduler_Summary.xlsx", course_numbers
+    return "Scheduler_Summary.xlsx", course_numbers
