@@ -6,7 +6,7 @@ from pyomo.environ import *
 from pyomo.opt import SolverFactory, SolverManagerFactory
 import os
 
-def run_scheduler(df, email):
+def run_scheduler(df, email, progress_callback=None):
     os.environ["NEOS_EMAIL"] = email
 
     student_afscs = df["AFSC"].tolist()
@@ -17,11 +17,8 @@ def run_scheduler(df, email):
     students = range(num_students)
     groups = range(4)
     
-    # Evenly divide students across 4 groups
     base_size = num_students // 4
-    extra = num_students % 4  # Distribute the remainder
-
-    # Build group sizes like [base+1, base+1, base, base] if extra = 2
+    extra = num_students % 4
     group_sizes = [base_size + 1 if i < extra else base_size for i in range(4)]
 
     interaction_matrix = np.zeros((num_students, num_students), dtype=int)
@@ -31,24 +28,13 @@ def run_scheduler(df, email):
     time_limit = 20
 
     course_numbers = [601, 600, 627, 632, 628, 633, 644, 667, 665, 660]
-
-    writer = pd.ExcelWriter("AY26_Scheduler_Summary.xlsx", engine='xlsxwriter')
     summary_rows = []
-
-    course_tab_names = {
-        601: '601 - Strategy',
-        600: '600 - Theory',
-        627: '627 - Total War',
-        632: '632 - Intl Politics',
-        628: '628 - Limited War',
-        633: '633 - Coercion',
-        644: '644 - IW',
-        667: '667 - Cyber',
-        665: '665 - Space',
-        660: '660 - Innovation'
-    }
+    assignment_rows = []
 
     for course_num in course_numbers:
+        if progress_callback:
+            progress_callback(f"📘 Solving Course {course_num}...")
+
         delta = (interaction_matrix == 0).astype(int)
         penalize = (interaction_matrix >= penalty_threshold).astype(int)
 
@@ -116,75 +102,80 @@ def run_scheduler(df, email):
                     interaction_matrix[a, b] += 1
                     interaction_matrix[b, a] += 1
 
-        pd.DataFrame(interaction_matrix, columns=student_names, index=student_names).to_excel(
-            writer, sheet_name=f"Matrix {course_num}")
-
-        sheet_name = course_tab_names.get(course_num, str(course_num))
-        group_data = []
         for g in groups:
             for s in courseGroups[g]:
-                group_data.append({
+                assignment_rows.append({
                     "Course": course_num,
                     "Group": g + 1,
-                    "Student Index": s,
                     "Student Name": student_names[s],
                     "AFSC": student_afscs[s]
                 })
-        group_df = pd.DataFrame(group_data)
-        group_df.to_excel(writer, sheet_name=sheet_name, index=False)
 
-        # Summary statistics
+        # Summary statistics for this course (final ones are shown only once)
         pairwiseCounts = interaction_matrix[np.triu_indices(num_students, k=1)]
-        unmetPairs = np.sum(pairwiseCounts == 0)
-        maxPairwise = np.max(pairwiseCounts)
-        pairsAtCap = np.sum(pairwiseCounts >= max_interaction)
-
         studentTotals = np.sum(interaction_matrix > 0, axis=1)
-        minStudent = np.min(studentTotals)
-        maxStudent = np.max(studentTotals)
-        avgStudent = np.mean(studentTotals)
-        medianStudent = np.median(studentTotals)
-        fullyPaired = np.sum(studentTotals == (num_students - 1))
 
-        summary_rows.append({
-            "Course": course_num,
-            "Unmet Pairs": unmetPairs,
-            "Max Pairwise": maxPairwise,
-            "Pairs at Cap": pairsAtCap,
-            "Min Student": minStudent,
-            "Max Student": maxStudent,
-            "Avg Student": round(avgStudent, 2),
-            "Median": medianStudent,
-            "Fully Paired": fullyPaired
-        })
+    # Save combined Excel sheet
+    summary_df = pd.DataFrame(assignment_rows)
 
-        # Save plots
-        plt.figure(figsize=(12, 10))
-        plt.imshow(interaction_matrix, cmap='Reds', vmin=0, vmax=max_interaction)
-        plt.colorbar(ticks=range(max_interaction + 1))
-        plt.title(f"Interaction Matrix After Course {course_num}")
-        plt.xticks(range(num_students), student_names, rotation=90)
-        plt.yticks(range(num_students), student_names)
-        plt.tight_layout()
-        plt.savefig(f"Heatmap_Course{course_num}.png")
-        plt.close()
+    summary_stats = {
+        "Unmet Pairs": np.sum(pairwiseCounts == 0),
+        "Max Pairwise": np.max(pairwiseCounts),
+        "Pairs at Cap": np.sum(pairwiseCounts >= max_interaction),
+        "Min Student": np.min(studentTotals),
+        "Max Student": np.max(studentTotals),
+        "Avg Student": round(np.mean(studentTotals), 2),
+        "Median": np.median(studentTotals),
+        "Fully Paired": np.sum(studentTotals == (num_students - 1))
+    }
 
-        plt.figure(figsize=(10, 10))
-        sorted_counts = np.sort(studentTotals)
-        sorted_names = [student_names[i] for i in np.argsort(studentTotals)]
-        bars = plt.barh(range(num_students), sorted_counts, color=(0.4, 0.6, 0.8))
-        for i, bar in enumerate(bars):
-            plt.text(bar.get_width() - 1, bar.get_y() + bar.get_height()/2, str(sorted_counts[i]),
-                     va='center', ha='right', color='white', fontweight='bold')
-        plt.yticks(range(num_students), sorted_names)
-        plt.xlabel("Number of Unique Interactions")
-        plt.title(f"Distinct Interactions After Course {course_num}")
-        plt.tight_layout()
-        plt.savefig(f"InteractionBar_Course{course_num}.png")
-        plt.close()
+    with pd.ExcelWriter("AY26_Scheduler_Summary.xlsx", engine='xlsxwriter') as writer:
+        summary_df.to_excel(writer, sheet_name='Summary', index=False)
 
-    summary_df = pd.DataFrame(summary_rows)
-    summary_df.to_excel(writer, sheet_name='Summary', index=False)
-    writer.close()
+        # Space row
+        spacer = pd.DataFrame([["", "", "", ""]], columns=summary_df.columns)
+        pd.concat([summary_df, spacer], ignore_index=True).to_excel(writer, sheet_name='Summary', index=False)
 
-    return "AY26_Scheduler_Summary.xlsx"
+        # Stats appended
+        pd.DataFrame([summary_stats]).to_excel(writer, sheet_name='Summary', startrow=len(summary_df) + 2, index=False)
+
+        # Final interaction matrix
+        pd.DataFrame(interaction_matrix, columns=student_names, index=student_names).to_excel(
+            writer, sheet_name="Interaction Matrix"
+        )
+
+    # Final visuals
+    fig, ax = plt.subplots(figsize=(12, 10))
+    im = ax.imshow(interaction_matrix, cmap='Reds', vmin=0, vmax=max_interaction)
+    for i in range(num_students):
+        for j in range(num_students):
+            label = "X" if i == j else str(interaction_matrix[i, j])
+            ax.text(j, i, label, ha='center', va='center', color='black')
+    ax.set_xticks(np.arange(num_students))
+    ax.set_yticks(np.arange(num_students))
+    ax.set_xticklabels(student_names, rotation=90)
+    ax.set_yticklabels(student_names)
+    plt.colorbar(im, ax=ax, ticks=range(max_interaction + 1))
+    plt.title("Final Interaction Matrix")
+    plt.tight_layout()
+    plt.savefig("Heatmap_Final.png")
+    plt.close()
+
+    # Final bar chart
+    fig, ax = plt.subplots(figsize=(10, 10))
+    sorted_counts = np.sort(studentTotals)
+    sorted_names = [student_names[i] for i in np.argsort(studentTotals)]
+    bars = ax.barh(range(num_students), sorted_counts, color=(0.4, 0.6, 0.8))
+    for i, bar in enumerate(bars):
+        ax.text(bar.get_width() - 1, bar.get_y() + bar.get_height()/2, str(sorted_counts[i]),
+                va='center', ha='right', color='white', fontweight='bold')
+    ax.set_yticks(range(num_students))
+    ax.set_yticklabels(sorted_names)
+    ax.set_xlabel("Number of Unique Interactions")
+    ax.set_ylabel("Student")
+    ax.set_title("Total Distinct Pairings per Student")
+    plt.tight_layout()
+    plt.savefig("InteractionBar_Final.png")
+    plt.close()
+
+    return "AY26_Scheduler_Summary.xlsx", course_numbers
