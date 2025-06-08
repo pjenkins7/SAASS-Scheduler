@@ -36,7 +36,7 @@ Upload a `.csv` file with the following **two columns**, with these exact header
 - **Student Name** must follow the format: `LastName-FirstInitial` (no spaces).
 - **Job Type** must be labeled **consistently**:
   - If the student is **not** from the Air Force, use an appropriate identifier. For example: `"Marine"`, `"Army"`, or `"Civ"` (case-sensitive, spelled exactly).
-  - Use consistent formatting for all AFSCs or job titles. For example, if you use `"15A"`, apply that format universally. Do **not** mix variants like `"15-A"`, `"15a"`, or `"Ops Research"`.
+  - Use consistent formatting for all job titles. For example, if you use `"15A"`, apply that format universally. Do **not** mix variants like `"15-A"`, `"15a"`, or `"Ops Research"`.
 -  Do **not** include extra columns or leave blank rows.
 - An **email address is required**, as the NEOS server uses it to process the optimization job.
 """)
