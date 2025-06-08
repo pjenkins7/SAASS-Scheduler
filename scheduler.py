@@ -107,7 +107,7 @@ def run_scheduler_single_course(
                 "Course": course_num,
                 "Group": g + 1,
                 "Student": student_names[s],
-                "Job Type": student_job_types[s]
+                # "Job Type": student_job_types[s]
             })
 
     new_assignment_df = pd.DataFrame(assignment_rows)
