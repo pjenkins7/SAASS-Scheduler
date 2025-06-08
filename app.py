@@ -90,10 +90,52 @@ if num_students > 0:
     if total_assigned != num_students:
         st.warning(f"⚠️ Total group sizes ({total_assigned}) do not match number of students ({num_students}).")
 
+# ---------------------------------------------------------
+# 📘 Instructions for Prior Groupings CSV
+st.markdown("""
+---
+
+### Prior Course Grouping CSV (Optional)
+
+To improve group diversity, upload a CSV with previous course assignments.  
+This file allows the model to track how often students have worked together.
+
+#### Required Columns (exact names):
+
+| Course | Group | Student     |
+|--------|-------|-------------|
+| 1      | 1     | Jenkins-P   |
+| 1      | 1     | Brown-D     |
+| 1      | 2     | Taylor-J    |
+
+#### Formatting Notes:
+- `Course`: Integer (e.g., 1, 2, 3 — not 600/601)
+- `Group`: Group number for that course (starts at 1)
+- `Student`: Must match the name from the uploaded student roster exactly
+
+A mismatch in student names will cause the interaction matrix to ignore that record.
+
+---
+
+
 # -----------------------------------------------
 # 📂 Upload previous assignments (for interaction matrix)
 st.markdown("### 📂 Upload Prior Course Groupings (Optional)")
 prior_csv = st.file_uploader("Upload prior course grouping CSV (Course, Group, Student)", type=["csv"])
+
+You can download a working example below:
+""")
+
+# ✅ Optional download: sample prior assignment file
+sample_prior_path = "sample_prior_assignments.csv"
+if os.path.exists(sample_prior_path):
+    with open(sample_prior_path, "rb") as f:
+        st.download_button(
+            label="📥 Download Example Prior Grouping CSV",
+            data=f,
+            file_name="sample_prior_assignments.csv",
+            mime="text/csv"
+        )
 
 interaction_matrix = None
 if num_students > 0:
