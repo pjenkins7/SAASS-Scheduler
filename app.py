@@ -168,7 +168,7 @@ if st.button("Run Optimization") and email and uploaded_roster and num_students 
             st.markdown("### New Groupings")
             for gnum in sorted(new_assignments["Group"].unique()):
                 st.markdown(f"**Group {gnum}**")
-                st.dataframe(new_assignments[new_assignments["Group"] == gnum][["Student", "Job Type"]].reset_index(drop=True))
+                st.dataframe(new_assignments[new_assignments["Group"] == gnum][["Student"]].reset_index(drop=True))
 
         except Exception as e:
             st.error(f"Error occurred: {e}")
