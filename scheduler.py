@@ -91,7 +91,12 @@ def run_scheduler_single_course(
     # --------------------- Solve ---------------------
     solver_manager = SolverManagerFactory('neos')
     solver = SolverFactory('cplex')
-    solver_manager.solve(model, opt=solver, tee=False, options={"timelimit": time_limit})
+    results = solver_manager.solve(
+        model,
+        opt=solver,
+        tee=False,
+        options={"timelimit": time_limit}
+    )
 
     # --------------------- Extract solution ---------------------
     assignment_rows = []
@@ -106,8 +111,7 @@ def run_scheduler_single_course(
             assignment_rows.append({
                 "Course": course_num,
                 "Group": g + 1,
-                "Student": student_names[s],
-                # "Job Type": student_job_types[s]
+                "Student": student_names[s]
             })
 
     new_assignment_df = pd.DataFrame(assignment_rows)
