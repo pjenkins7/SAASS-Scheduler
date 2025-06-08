@@ -171,99 +171,101 @@ if st.button("Run Optimization") and email and uploaded_roster and num_students 
             for gnum in sorted(new_assignments["Group"].unique()):
                 st.markdown(f"**Group {gnum}**")
                 st.dataframe(new_assignments[new_assignments["Group"] == gnum][["Student"]].reset_index(drop=True))
+             
+            # 📊 Interaction Visualizations
+            # -------------------------------
+            st.markdown("## 📊 Interaction Visualizations")
+    
+            # Reconstruct interaction matrix from all_assignments
+            all_students = sorted(all_assignments["Student"].unique())
+            interaction_vis_matrix = pd.DataFrame(0, index=all_students, columns=all_students)
+    
+            for course in all_assignments["Course"].unique():
+                course_data = all_assignments[all_assignments["Course"] == course]
+                for group in course_data["Group"].dropna().unique():
+                    members = course_data[course_data["Group"] == group]["Student"].tolist()
+                    for i in range(len(members)):
+                        for j in range(i + 1, len(members)):
+                            interaction_vis_matrix.loc[members[i], members[j]] += 1
+                            interaction_vis_matrix.loc[members[j], members[i]] += 1
+    
+            # --- Heatmap of interaction matrix ---
+            st.markdown("### Heatmap of Total Student Interactions")
+         
+            heatmap_data = interaction_vis_matrix.copy()
+            heatmap_array = heatmap_data.to_numpy(copy=True)
+            if heatmap_array.shape[0] == heatmap_array.shape[1]:
+                np.fill_diagonal(heatmap_array, np.nan)
+            
+            fig3, ax3 = plt.subplots(figsize=(12, 10))
+            sns.heatmap(heatmap_array, cmap="Reds", annot=True, fmt=".0f",
+                        linewidths=0.5, linecolor='gray', ax=ax3,
+                        cbar_kws={'label': 'Times Paired'},
+                        xticklabels=heatmap_data.columns,
+                        yticklabels=heatmap_data.index)
+            plt.xticks(rotation=45, ha='right')
+            st.pyplot(fig3)
+    
+    
+    
+    
+    
+            # --- Distinct interactions per student ---
+            pairwise_partners = {s: set() for s in all_students}
+            for i in range(len(all_students)):
+                for j in range(len(all_students)):
+                    if i != j and interaction_vis_matrix.iloc[i, j] > 0:
+                        pairwise_partners[all_students[i]].add(all_students[j])
+            distinct_counts = pd.Series({s: len(p) for s, p in pairwise_partners.items()}).sort_values()
+    
+            st.markdown("### 🔄 Distinct Pairings per Student")
+            fig, ax = plt.subplots(figsize=(10, 12))
+            bars = ax.barh(distinct_counts.index, distinct_counts.values, color='skyblue')
+            ax.set_xlabel("Number of Unique Students Paired With")
+            for bar in bars:
+                ax.text(bar.get_width() + 0.5, bar.get_y() + bar.get_height() / 2, str(int(bar.get_width())), va='center')
+            st.pyplot(fig)
+    
+            # --- Histogram of interaction frequency ---
+            st.markdown("### 📈 Distribution of Student Pairing Frequency")
+            pair_counts = interaction_vis_matrix.where(np.triu(np.ones(interaction_vis_matrix.shape), k=1).astype(bool)).stack()
+            distribution = pair_counts.value_counts().sort_index()
+    
+            fig2, ax2 = plt.subplots(figsize=(10, 6))
+            bars = ax2.bar(distribution.index.astype(str), distribution.values, color='mediumseagreen')
+            ax2.set_xlabel("Times Paired")
+            ax2.set_ylabel("Number of Student Pairs")
+            ax2.set_title("Histogram of Pairwise Interactions")
+            for bar in bars:
+                ax2.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 1, f'{int(bar.get_height())}', ha='center')
+            st.pyplot(fig2)
+            # --- Summary Statistics ---
+            st.markdown("### 📊 Summary Statistics")
+    
+            total_students = len(all_students)
+            total_courses = all_assignments["Course"].nunique()
+            min_val = int(distinct_counts.min())
+            max_val = int(distinct_counts.max())
+            mean_val = round(distinct_counts.mean(), 1)
+            median_val = int(distinct_counts.median())
+            std_val = round(distinct_counts.std(ddof=0), 2)
+            fully_paired = sum(distinct_counts == total_students - 1)
+    
+            summary_stats = pd.DataFrame([
+                {"Metric": "Total Students", "Value": total_students},
+                {"Metric": "Total Courses", "Value": total_courses},
+                {"Metric": "Min Distinct Interactions", "Value": min_val},
+                {"Metric": "Max Distinct Interactions", "Value": max_val},
+                {"Metric": "Average Distinct Interactions", "Value": mean_val},
+                {"Metric": "Median Distinct Interactions", "Value": median_val},
+                {"Metric": "Std Dev of Distinct Interactions", "Value": std_val},
+                {"Metric": "Students Fully Paired", "Value": fully_paired}
+            ])
+    
+            st.dataframe(summary_stats.set_index("Metric"))
+
 
         except Exception as e:
             st.error(f"Error occurred: {e}")
-                # -------------------------------
-        # 📊 Interaction Visualizations
-        # -------------------------------
-        st.markdown("## 📊 Interaction Visualizations")
-
-        # Reconstruct interaction matrix from all_assignments
-        all_students = sorted(all_assignments["Student"].unique())
-        interaction_vis_matrix = pd.DataFrame(0, index=all_students, columns=all_students)
-
-        for course in all_assignments["Course"].unique():
-            course_data = all_assignments[all_assignments["Course"] == course]
-            for group in course_data["Group"].dropna().unique():
-                members = course_data[course_data["Group"] == group]["Student"].tolist()
-                for i in range(len(members)):
-                    for j in range(i + 1, len(members)):
-                        interaction_vis_matrix.loc[members[i], members[j]] += 1
-                        interaction_vis_matrix.loc[members[j], members[i]] += 1
-
-        # --- Heatmap of interaction matrix ---
-        st.markdown("### Heatmap of Total Student Interactions")
-     
-        heatmap_data = interaction_vis_matrix.copy()
-        heatmap_array = heatmap_data.to_numpy(copy=True)
-        if heatmap_array.shape[0] == heatmap_array.shape[1]:
-            np.fill_diagonal(heatmap_array, np.nan)
-        
-        fig3, ax3 = plt.subplots(figsize=(12, 10))
-        sns.heatmap(heatmap_array, cmap="Reds", annot=True, fmt=".0f",
-                    linewidths=0.5, linecolor='gray', ax=ax3,
-                    cbar_kws={'label': 'Times Paired'},
-                    xticklabels=heatmap_data.columns,
-                    yticklabels=heatmap_data.index)
-        plt.xticks(rotation=45, ha='right')
-        st.pyplot(fig3)
-
-
-
-
-
-        # --- Distinct interactions per student ---
-        pairwise_partners = {s: set() for s in all_students}
-        for i in range(len(all_students)):
-            for j in range(len(all_students)):
-                if i != j and interaction_vis_matrix.iloc[i, j] > 0:
-                    pairwise_partners[all_students[i]].add(all_students[j])
-        distinct_counts = pd.Series({s: len(p) for s, p in pairwise_partners.items()}).sort_values()
-
-        st.markdown("### 🔄 Distinct Pairings per Student")
-        fig, ax = plt.subplots(figsize=(10, 12))
-        bars = ax.barh(distinct_counts.index, distinct_counts.values, color='skyblue')
-        ax.set_xlabel("Number of Unique Students Paired With")
-        for bar in bars:
-            ax.text(bar.get_width() + 0.5, bar.get_y() + bar.get_height() / 2, str(int(bar.get_width())), va='center')
-        st.pyplot(fig)
-
-        # --- Histogram of interaction frequency ---
-        st.markdown("### 📈 Distribution of Student Pairing Frequency")
-        pair_counts = interaction_vis_matrix.where(np.triu(np.ones(interaction_vis_matrix.shape), k=1).astype(bool)).stack()
-        distribution = pair_counts.value_counts().sort_index()
-
-        fig2, ax2 = plt.subplots(figsize=(10, 6))
-        bars = ax2.bar(distribution.index.astype(str), distribution.values, color='mediumseagreen')
-        ax2.set_xlabel("Times Paired")
-        ax2.set_ylabel("Number of Student Pairs")
-        ax2.set_title("Histogram of Pairwise Interactions")
-        for bar in bars:
-            ax2.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 1, f'{int(bar.get_height())}', ha='center')
-        st.pyplot(fig2)
-        # --- Summary Statistics ---
-        st.markdown("### 📊 Summary Statistics")
-
-        total_students = len(all_students)
-        total_courses = all_assignments["Course"].nunique()
-        min_val = int(distinct_counts.min())
-        max_val = int(distinct_counts.max())
-        mean_val = round(distinct_counts.mean(), 1)
-        median_val = int(distinct_counts.median())
-        std_val = round(distinct_counts.std(ddof=0), 2)
-        fully_paired = sum(distinct_counts == total_students - 1)
-
-        summary_stats = pd.DataFrame([
-            {"Metric": "Total Students", "Value": total_students},
-            {"Metric": "Total Courses", "Value": total_courses},
-            {"Metric": "Min Distinct Interactions", "Value": min_val},
-            {"Metric": "Max Distinct Interactions", "Value": max_val},
-            {"Metric": "Average Distinct Interactions", "Value": mean_val},
-            {"Metric": "Median Distinct Interactions", "Value": median_val},
-            {"Metric": "Std Dev of Distinct Interactions", "Value": std_val},
-            {"Metric": "Students Fully Paired", "Value": fully_paired}
-        ])
-
-        st.dataframe(summary_stats.set_index("Metric"))
-
+            
+       
