@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import os
+import matplotlib.pyplot as plt
+import seaborn as sns
 from datetime import datetime
 from scheduler import run_scheduler_single_course
 
@@ -191,9 +193,8 @@ if st.button("Run Optimization") and email and uploaded_roster and num_students 
                         interaction_vis_matrix.loc[members[j], members[i]] += 1
 
         # --- Heatmap of interaction matrix ---
-        st.markdown("### 🧊 Heatmap of Total Student Interactions")
-        import seaborn as sns
-        
+        st.markdown("### Heatmap of Total Student Interactions")
+     
         heatmap_data = interaction_vis_matrix.copy()
         heatmap_array = heatmap_data.to_numpy(copy=True)
         np.fill_diagonal(heatmap_array, np.nan)
@@ -217,7 +218,6 @@ if st.button("Run Optimization") and email and uploaded_roster and num_students 
         distinct_counts = pd.Series({s: len(p) for s, p in pairwise_partners.items()}).sort_values()
 
         st.markdown("### 🔄 Distinct Pairings per Student")
-        import matplotlib.pyplot as plt
         fig, ax = plt.subplots(figsize=(10, 12))
         bars = ax.barh(distinct_counts.index, distinct_counts.values, color='skyblue')
         ax.set_xlabel("Number of Unique Students Paired With")
