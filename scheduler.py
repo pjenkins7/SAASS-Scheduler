@@ -1,4 +1,14 @@
+# scheduler.py
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from pyomo.environ import *
+from pyomo.opt import SolverFactory, SolverManagerFactory
+import os
+
 def run_scheduler_single_course(df, course_num, email,
+                                group_sizes,
+                                interaction_matrix=None,
                                 job_type_limit=2,
                                 penalty_threshold=3,
                                 max_interaction=4,
@@ -6,34 +16,34 @@ def run_scheduler_single_course(df, course_num, email,
                                 time_limit=20,
                                 progress_callback=None,
                                 progress_bar=None,
-                                output_filename="SAASS_Scheduler_Summary.xlsx"):
+                                output_filename="SAASS_Scheduler_Output.xlsx"):
+
     os.environ["NEOS_EMAIL"] = email
 
-    student_job_types = df["Job Type"].tolist()
     student_names = df["Student Name"].tolist()
+    student_job_types = df["Job Type"].tolist()
     unique_job_types = sorted(set(student_job_types))
-
     num_students = len(student_names)
-    students = range(num_students)
-    groups = range(4)
-    
-    base_size = num_students // 4
-    extra = num_students % 4
-    group_sizes = [base_size + 1 if i < extra else base_size for i in range(4)]
 
-    interaction_matrix = np.zeros((num_students, num_students), dtype=int)
+    students = range(num_students)
+    groups = range(len(group_sizes))
+
+    # Default to empty interaction matrix if none provided
+    if interaction_matrix is None:
+        interaction_matrix = np.zeros((num_students, num_students), dtype=int)
+
+    delta = (interaction_matrix == 0).astype(int)
+    penalize = (interaction_matrix >= penalty_threshold).astype(int)
 
     if progress_callback:
         progress_callback(f"📘 Solving Course {course_num}...")
     if progress_bar:
         progress_bar.progress(1.0)
 
-    delta = (interaction_matrix == 0).astype(int)
-    penalize = (interaction_matrix >= penalty_threshold).astype(int)
-
+    # --------------------- Pyomo model ---------------------
     model = ConcreteModel()
     model.S = RangeSet(0, num_students - 1)
-    model.G = RangeSet(0, 3)
+    model.G = RangeSet(0, len(group_sizes) - 1)
 
     model.x = Var(model.S, model.G, within=Binary)
     model.w = Var(model.S, model.S, model.G, within=Binary)
@@ -76,10 +86,12 @@ def run_scheduler_single_course(df, course_num, email,
                 for g in groups:
                     model.cap_limit.add(model.w[i, j, g] == 0)
 
+    # --------------------- Solve ---------------------
     solver_manager = SolverManagerFactory('neos')
     solver = SolverFactory('cplex')
     solver_manager.solve(model, opt=solver, tee=False, options={"timelimit": time_limit})
 
+    # --------------------- Extract solution ---------------------
     assignment_rows = []
     courseGroups = {g: [] for g in groups}
     for s in students:
@@ -96,6 +108,7 @@ def run_scheduler_single_course(df, course_num, email,
                 "Job Type": student_job_types[s]
             })
 
+    # --------------------- Write to Excel ---------------------
     with pd.ExcelWriter(output_filename, engine='xlsxwriter') as writer:
         pd.DataFrame(assignment_rows).to_excel(writer, sheet_name="Summary", index=False)
 
