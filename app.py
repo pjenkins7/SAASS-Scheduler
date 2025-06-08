@@ -44,6 +44,17 @@ Upload a `.csv` file with the following **two columns**, with these exact header
 # -----------------------------------------------
 uploaded_roster = st.file_uploader("📋 Upload the student roster CSV (Student Name, Job Type)", type=["csv"])
 
+# ✅ Optional download: sample file
+if os.path.exists("sample_roster.csv"):
+    with open("sample_roster.csv", "rb") as f:
+        st.download_button(
+            label=" Download Example CSV File",
+            data=f,
+            file_name="sample_roster.csv",
+            mime="text/csv"
+        )
+
+
 # -----------------------------------------------
 student_names = []
 job_types = []
