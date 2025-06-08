@@ -29,7 +29,7 @@ def run_scheduler_single_course(
     num_students = len(student_names)
 
     students = range(num_students)
-    groups = range(len(group_sizes))  # ✅ Ensures `groups` is globally visible
+    groups = range(len(group_sizes))
 
     if interaction_matrix is None:
         interaction_matrix = np.zeros((num_students, num_students), dtype=int)
@@ -112,7 +112,7 @@ def run_scheduler_single_course(
 
     new_assignment_df = pd.DataFrame(assignment_rows)
 
-    # 🧩 Merge with prior assignment history
+    # --------------------- Append to prior if available ---------------------
     if prior_assignment_df is not None:
         full_assignment_df = pd.concat([prior_assignment_df, new_assignment_df], ignore_index=True)
     else:
