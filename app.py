@@ -130,6 +130,17 @@ penalty_threshold = st.number_input("Penalty threshold (interactions)", min_valu
 max_interaction = st.number_input("Max allowed interactions", min_value=1, value=4)
 time_limit = st.number_input("Solver time limit (seconds)", min_value=10, max_value=3600, value=30)
 
+# Warn user if required inputs are missing
+if not email:
+    st.warning("⚠️ Please enter a valid email to proceed with optimization.")
+
+if not uploaded_roster:
+    st.warning("⚠️ Please upload a valid roster CSV file.")
+
+if num_students == 0:
+    st.warning("⚠️ No students loaded from roster. Ensure your CSV has the correct format.")
+
+
 # Run optimization
 if st.button("Run Optimization") and email and uploaded_roster and num_students > 0:
     if total_assigned != num_students:
