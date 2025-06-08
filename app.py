@@ -3,10 +3,11 @@ import streamlit as st
 import pandas as pd
 import os
 from datetime import datetime
-from scheduler import run_scheduler
+from scheduler import run_scheduler_single_course
 
 st.set_page_config(page_title="SAASS Scheduler", layout="wide")
 st.title("SAASS Scheduler (NEOS-Backed Optimization)")
+
 # ---------------------------------------------------------
 # 📝 Instructions and CSV guidance
 st.markdown("""
@@ -21,12 +22,12 @@ This tool assigns students to balanced course groups using optimization submitte
 Upload a `.csv` file with the following **two columns**, with these exact headers:
 
 | Student Name | Job Type |
-|--------------|------|
-| Jenkins-P    | 15A  |
-| Brown-D      | 21A  |
-| Taylor-J     | Civ  |
-| Jones-P      | Army |
-| Carter-X     | Marine |
+|--------------|----------|
+| Jenkins-P    | 15A      |
+| Brown-D      | 21A      |
+| Taylor-J     | Civ      |
+| Jones-P      | Army     |
+| Carter-X     | Marine   |
 
 ---
 
@@ -34,20 +35,19 @@ Upload a `.csv` file with the following **two columns**, with these exact header
 
 - **Student Name** must follow the format: `LastName-FirstInitial` (no spaces).
 - **Job Type** must be labeled **consistently**:
-  - If the student is **not** from the Air Force, use an appropriate identifier. For example: `"Marine"`, `"Army"`, or `"Civ"` (case-sensitive, spelled exactly).
-  - Use consistent formatting for all AFSCs or job titles. For example, if you use `"15A"`, apply that format universally. Do **not** mix variants like `"15-A"`, `"15a"`, or `"Ops Research"`.
--  Do **not** include extra columns or leave blank rows.
-- An **email address is required**, as the NEOS server uses it to process the optimization job.
+  - Use `"Marine"`, `"Army"`, or `"Civ"` for non-Air Force students (case-sensitive).
+  - Use consistent formatting for all AFSCs (e.g., `"15A"`, not `"15-A"` or `"Ops Research"`).
+- Do **not** include extra columns or blank rows.
+- A valid **email address is required**, as the NEOS server uses it to run the optimization.
 
-**Why it matters:**  
-The optimization model enforces a constraint that **no more than two members with the same job title** can be assigned to a single group. Inconsistent or misspelled entries will bypass this constraint, potentially reducing solution quality.
+---
 """)
 
 # ✅ Optional download: sample file
 if os.path.exists("sample_roster.csv"):
     with open("sample_roster.csv", "rb") as f:
         st.download_button(
-            label=" Download Example CSV File",
+            label="📥 Download Example CSV File",
             data=f,
             file_name="sample_roster.csv",
             mime="text/csv"
@@ -56,6 +56,11 @@ if os.path.exists("sample_roster.csv"):
 # ✅ Input fields
 email = st.text_input("Enter a valid email address:")
 uploaded_file = st.file_uploader("Upload the SAASS student roster CSV", type=["csv"])
+
+course_number = st.number_input("Enter Course Number (e.g., 600):", min_value=100, max_value=999, step=1, value=600)
+job_type_limit = st.number_input("Max students per job type in each group:", min_value=1, max_value=10, value=2)
+penalty_threshold = st.number_input("Penalty threshold (pairs beyond this will be penalized):", min_value=1, max_value=10, value=3)
+max_interaction = st.number_input("Maximum allowed interactions between any student pair:", min_value=1, max_value=10, value=4)
 
 # ✅ Session state init
 if "opt_run" not in st.session_state:
@@ -68,21 +73,14 @@ if uploaded_file:
     st.session_state.uploaded = uploaded_file
 
 # ✅ Run-time Disclaimer
-st.warning("""
-**Important Note on Runtime**
-
-Each course is submitted individually to the [NEOS Server](https://neos-server.org) using the CPLEX solver.  
-We have set a **10-minute time limit per course** to allow the solver to sufficiently explore the solution space and generate **high-quality (though not guaranteed optimal)** solutions.
-
-Since this scheduler runs for **10 courses sequentially**, total runtime may take up to **2 hours**.
-
-We recommend starting the optimization and **returning later** to download your results.
+st.info("""
+This version of the app solves **only one course at a time**.  
+You can select which course to solve and customize interaction and job constraints above.  
+Expected runtime: **1–10 minutes**, depending on NEOS server load.
 """)
-
 
 # ✅ Buttons in a row
 col1, col2 = st.columns([1, 1])
-
 with col1:
     if st.button("🚀 Start Optimization"):
         st.session_state.opt_run = True
@@ -100,14 +98,16 @@ if email and st.session_state.uploaded and st.session_state.opt_run:
             st.write("📡 Submitting job to NEOS server...")
             progress_bar = st.progress(0.0)
 
-            # Generate unique timestamped output name
             timestamp = datetime.now().strftime("%Y-%m-%d_%H%M")
-            output_filename = f"SAASS_Scheduler_{timestamp}.xlsx"
+            output_filename = f"SAASS_Scheduler_{course_number}_{timestamp}.xlsx"
 
-            # Run the scheduler
-            output_file, _ = run_scheduler(
-                df,
-                email,
+            output_file = run_scheduler_single_course(
+                df=df,
+                course_num=course_number,
+                email=email,
+                job_type_limit=job_type_limit,
+                penalty_threshold=penalty_threshold,
+                max_interaction=max_interaction,
                 progress_callback=show_step,
                 progress_bar=progress_bar,
                 output_filename=output_filename
