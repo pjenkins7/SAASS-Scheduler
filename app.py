@@ -9,7 +9,7 @@ st.set_page_config(page_title="SAASS Scheduler", layout="wide")
 st.title("SAASS Scheduler (NEOS-Backed Optimization)")
 
 # ---------------------------------------------------------
-# 📝 Instructions and CSV guidance
+# 📘 Full Instructions and CSV Guidance
 st.markdown("""
 Welcome to the **SAASS Scheduler**.
 
@@ -17,45 +17,65 @@ This tool assigns students to balanced course groups using optimization submitte
 
 ---
 
-### What You'll Need
+### 🗂️ Required Roster CSV (All Users)
 
-Upload a `.csv` file with the following **two columns**, with these exact headers:
+Upload a `.csv` file with exactly **two columns**:
 
 | Student Name | Job Type |
-|--------------|------|
-| Jenkins-P    | 15A  |
-| Brown-D      | 21A  |
-| Taylor-J     | Civ  |
-| Jones-P      | Army |
-| Carter-X     | Marine |
+|--------------|----------|
+| Jenkins-P    | 15A      |
+| Brown-D      | 21A      |
+| Taylor-J     | Civ      |
+
+#### Roster Formatting Rules:
+- `Student Name` format must be `LastName-FirstInitial` (no spaces).
+- `Job Type` must be consistent (e.g., always use `"15A"`, not `"15-A"` or `"15a"`).
+- Use `"Marine"`, `"Army"`, or `"Civ"` for non-Air Force roles.
+- ❌ Do **not** include extra columns or blank rows.
+- ✅ An email is required to submit jobs to NEOS.
 
 ---
 
-### Formatting Guidelines (Important)
+### 📘 Optional Prior Grouping CSV (for Interaction Awareness)
 
-- **Student Name** must follow the format: `LastName-FirstInitial` (no spaces).
-- **Job Type** must be labeled **consistently**:
-  - If the student is **not** from the Air Force, use an appropriate identifier. For example: `"Marine"`, `"Army"`, or `"Civ"` (case-sensitive, spelled exactly).
-  - Use consistent formatting for all job titles. For example, if you use `"15A"`, apply that format universally. Do **not** mix variants like `"15-A"`, `"15a"`, or `"Ops Research"`.
--  Do **not** include extra columns or leave blank rows.
-- An **email address is required**, as the NEOS server uses it to process the optimization job.
+If prior courses have been completed, upload a CSV with **previous groupings** to guide the model’s interaction penalties.
+
+| Course | Group | Student     |
+|--------|-------|-------------|
+| 1      | 1     | Jenkins-P   |
+| 1      | 1     | Brown-D     |
+| 1      | 2     | Taylor-J    |
+
+#### Prior CSV Formatting Rules:
+- `Course`: Integer (e.g., 1, 2, 3)
+- `Group`: Group number for that course (starts at 1)
+- `Student`: Must match roster names exactly
+
+💡 A mismatch in student names will cause that record to be ignored.
 """)
 
-# -----------------------------------------------
-uploaded_roster = st.file_uploader("📋 Upload the student roster CSV (Student Name, Job Type)", type=["csv"])
-
-# ✅ Optional download: sample file
+# ✅ Optional download: sample files
 if os.path.exists("sample_roster.csv"):
     with open("sample_roster.csv", "rb") as f:
         st.download_button(
-            label=" Download Example CSV File",
+            label="📥 Download Example Roster CSV",
             data=f,
             file_name="sample_roster.csv",
             mime="text/csv"
         )
 
+if os.path.exists("sample_prior_assignments.csv"):
+    with open("sample_prior_assignments.csv", "rb") as f:
+        st.download_button(
+            label="📥 Download Example Prior Grouping CSV",
+            data=f,
+            file_name="sample_prior_assignments.csv",
+            mime="text/csv"
+        )
 
 # -----------------------------------------------
+uploaded_roster = st.file_uploader("📋 Upload the student roster CSV (Student Name, Job Type)", type=["csv"])
+
 student_names = []
 job_types = []
 num_students = 0
@@ -90,51 +110,10 @@ if num_students > 0:
     if total_assigned != num_students:
         st.warning(f"⚠️ Total group sizes ({total_assigned}) do not match number of students ({num_students}).")
 
-# ---------------------------------------------------------
-# 📘 Instructions for Prior Groupings CSV
-st.markdown("""
----
-
-### Prior Course Grouping CSV (Optional)
-
-If previous courses have been completed, upload a CSV with the previous course grouping.  
-
-#### Required Columns (exact names):
-
-| Course | Group | Student     |
-|--------|-------|-------------|
-| 1      | 1     | Jenkins-P   |
-| 1      | 1     | Brown-D     |
-| 1      | 2     | Taylor-J    |
-
-#### Formatting Notes:
-- `Course`: Integer (e.g., 1, 2, 3)
-- `Group`: Group number for that course
-- `Student`: Must match the name from the uploaded student roster exactly
-
-A mismatch in student names will cause the interaction matrix to ignore that record.
-
----
-
-
 # -----------------------------------------------
 # 📂 Upload previous assignments (for interaction matrix)
 st.markdown("### 📂 Upload Prior Course Groupings (Optional)")
 prior_csv = st.file_uploader("Upload prior course grouping CSV (Course, Group, Student)", type=["csv"])
-
-You can download a working example below:
-""")
-
-# ✅ Optional download: sample prior assignment file
-sample_prior_path = "sample_prior_assignments.csv"
-if os.path.exists(sample_prior_path):
-    with open(sample_prior_path, "rb") as f:
-        st.download_button(
-            label="📥 Download Example Prior Grouping CSV",
-            data=f,
-            file_name="sample_prior_assignments.csv",
-            mime="text/csv"
-        )
 
 interaction_matrix = None
 if num_students > 0:
@@ -163,7 +142,7 @@ if num_students > 0:
 # 🎛️ Model parameters
 st.markdown("### ⚙️ Optimization Settings")
 email = st.text_input("Enter your email (required for NEOS):")
-course_number = st.number_input("Course number to assign (e.g., 600)", min_value=100, max_value=999, step=1, value=600)
+course_number = st.number_input("Course number to assign (e.g., 1)", min_value=1, max_value=999, step=1, value=1)
 job_type_limit = st.number_input("Max students per job type in each group:", min_value=1, max_value=10, value=2)
 penalty_threshold = st.number_input("Penalty threshold (pairs beyond this will be penalized):", min_value=1, max_value=10, value=3)
 max_interaction = st.number_input("Maximum allowed interactions between any student pair:", min_value=1, max_value=10, value=4)
