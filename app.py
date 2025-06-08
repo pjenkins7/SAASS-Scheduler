@@ -33,8 +33,7 @@ Upload a `.csv` file with exactly **two columns**:
 - `Student Name` format must be `LastName-FirstInitial` (no spaces).
 - `Job Type` must be consistent (e.g., always use `"15A"`, not `"15-A"` or `"15a"`).
 - Use `"Marine"`, `"Army"`, or `"Civ"` for non-Air Force roles.
-- ❌ Do **not** include extra columns or blank rows.
-- ✅ An email is required to submit jobs to NEOS.
+- Do **not** include extra columns or blank rows.
 
 ---
 
@@ -98,7 +97,7 @@ if num_students > 0:
         st.warning(f"Group sizes sum to {total_assigned}, but roster has {num_students} students.")
 
 # Upload prior grouping
-prior_csv = st.file_uploader("Upload Prior Grouping CSV", type=["csv"])
+prior_csv = st.file_uploader("Upload Prior Grouping CSV (optional)", type=["csv"])
 interaction_matrix = None
 prior_df = None
 suggested_course = 1
