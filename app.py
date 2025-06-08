@@ -197,7 +197,8 @@ if st.button("Run Optimization") and email and uploaded_roster and num_students 
      
         heatmap_data = interaction_vis_matrix.copy()
         heatmap_array = heatmap_data.to_numpy(copy=True)
-        np.fill_diagonal(heatmap_array, np.nan)
+        if heatmap_array.shape[0] == heatmap_array.shape[1]:
+            np.fill_diagonal(heatmap_array, np.nan)
         
         fig3, ax3 = plt.subplots(figsize=(12, 10))
         sns.heatmap(heatmap_array, cmap="Reds", annot=True, fmt=".0f",
@@ -207,6 +208,9 @@ if st.button("Run Optimization") and email and uploaded_roster and num_students 
                     yticklabels=heatmap_data.index)
         plt.xticks(rotation=45, ha='right')
         st.pyplot(fig3)
+
+
+
 
 
         # --- Distinct interactions per student ---
