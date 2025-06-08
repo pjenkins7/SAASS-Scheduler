@@ -9,9 +9,9 @@ import os
 def run_scheduler(df, email, progress_callback=None, progress_bar=None, output_filename="SAASS_Scheduler_Summary.xlsx"):
     os.environ["NEOS_EMAIL"] = email
 
-    student_afscs = df["AFSC"].tolist()
+    student_job_types = df["Job Type"].tolist()
     student_names = df["Student Name"].tolist()
-    unique_afscs = sorted(set(student_afscs))
+    unique_job_types = sorted(set(student_job_types))
 
     num_students = len(student_names)
     students = range(num_students)
@@ -62,11 +62,11 @@ def run_scheduler(df, email, progress_callback=None, progress_bar=None, output_f
         for g in groups:
             model.group_size.add(sum(model.x[s, g] for s in students) == group_sizes[g])
 
-        model.afsc_limit = ConstraintList()
+        model.job_type_limit = ConstraintList()
         for g in groups:
-            for afsc in unique_afscs:
-                indices = [i for i, code in enumerate(student_afscs) if code == afsc]
-                model.afsc_limit.add(sum(model.x[i, g] for i in indices) <= 2)
+            for job_type in unique_job_types:
+                indices = [i for i, code in enumerate(student_job_types) if code == job_type]
+                model.job_type_limit.add(sum(model.x[i, g] for i in indices) <= 2)
 
         model.lin_le = ConstraintList()
         model.lin_ge = ConstraintList()
@@ -109,7 +109,7 @@ def run_scheduler(df, email, progress_callback=None, progress_bar=None, output_f
                     "Course": course_num,
                     "Group": g + 1,
                     "Student Name": student_names[s],
-                    "AFSC": student_afscs[s]
+                    "job_type": student_job_types[s]
                 })
 
         # Capture stats for this course
