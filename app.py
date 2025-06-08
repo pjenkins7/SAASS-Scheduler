@@ -128,7 +128,7 @@ course_number = st.number_input("Course number to assign", min_value=1, value=su
 job_type_limit = st.number_input("Max per job type per group", min_value=1, value=2)
 penalty_threshold = st.number_input("Penalty threshold (interactions)", min_value=1, value=3)
 max_interaction = st.number_input("Max allowed interactions", min_value=1, value=4)
-time_limit = st.number_input("Solver time limit (seconds)", min_value=10, max_value=3600, value=600)
+time_limit = st.number_input("Solver time limit (seconds)", min_value=10, max_value=3600, value=30)
 
 # Run optimization
 if st.button("Run Optimization") and email and uploaded_roster and num_students > 0:
