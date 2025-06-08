@@ -193,15 +193,20 @@ if st.button("Run Optimization") and email and uploaded_roster and num_students 
         # --- Heatmap of interaction matrix ---
         st.markdown("### 🧊 Heatmap of Total Student Interactions")
         import seaborn as sns
+        
         heatmap_data = interaction_vis_matrix.copy()
-        np.fill_diagonal(heatmap_data.values, np.nan)  # blank out self-interactions
-
+        heatmap_array = heatmap_data.to_numpy(copy=True)
+        np.fill_diagonal(heatmap_array, np.nan)
+        
         fig3, ax3 = plt.subplots(figsize=(12, 10))
-        sns.heatmap(heatmap_data, cmap="Reds", annot=True, fmt=".0f",
+        sns.heatmap(heatmap_array, cmap="Reds", annot=True, fmt=".0f",
                     linewidths=0.5, linecolor='gray', ax=ax3,
-                    cbar_kws={'label': 'Times Paired'})
+                    cbar_kws={'label': 'Times Paired'},
+                    xticklabels=heatmap_data.columns,
+                    yticklabels=heatmap_data.index)
         plt.xticks(rotation=45, ha='right')
         st.pyplot(fig3)
+
 
         # --- Distinct interactions per student ---
         pairwise_partners = {s: set() for s in all_students}
