@@ -5,3 +5,4 @@ matplotlib
 pyomo
 openpyxl
 xlsxwriter
+seaborn
