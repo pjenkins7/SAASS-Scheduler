@@ -20,7 +20,7 @@ This tool assigns students to balanced course groups using optimization submitte
 
 Upload a `.csv` file with the following **two columns**, with these exact headers:
 
-| Student Name | AFSC |
+| Student Name | Job Type |
 |--------------|------|
 | Jenkins-P    | 15A  |
 | Brown-D      | 21A  |
