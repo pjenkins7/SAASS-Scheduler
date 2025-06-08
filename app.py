@@ -97,8 +97,7 @@ st.markdown("""
 
 ### Prior Course Grouping CSV (Optional)
 
-To improve group diversity, upload a CSV with previous course assignments.  
-This file allows the model to track how often students have worked together.
+If previous courses have been completed, upload a CSV with the previous course grouping.  
 
 #### Required Columns (exact names):
 
@@ -109,8 +108,8 @@ This file allows the model to track how often students have worked together.
 | 1      | 2     | Taylor-J    |
 
 #### Formatting Notes:
-- `Course`: Integer (e.g., 1, 2, 3 — not 600/601)
-- `Group`: Group number for that course (starts at 1)
+- `Course`: Integer (e.g., 1, 2, 3)
+- `Group`: Group number for that course
 - `Student`: Must match the name from the uploaded student roster exactly
 
 A mismatch in student names will cause the interaction matrix to ignore that record.
