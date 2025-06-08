@@ -178,7 +178,8 @@ if st.button("Run Optimization") and email and uploaded_roster and num_students 
     
             # Reconstruct interaction matrix from all_assignments
             all_students = sorted(all_assignments["Student"].unique())
-            interaction_vis_matrix = pd.DataFrame(0, index=all_students, columns=all_students)
+            interaction_vis_matrix = pd.DataFrame(0.0, index=all_students, columns=all_students)
+
     
             for course in all_assignments["Course"].unique():
                 course_data = all_assignments[all_assignments["Course"] == course]
