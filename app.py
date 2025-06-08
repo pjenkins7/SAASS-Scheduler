@@ -111,9 +111,8 @@ if num_students > 0:
         st.warning(f"⚠️ Total group sizes ({total_assigned}) do not match number of students ({num_students}).")
 
 # -----------------------------------------------
-# 📂 Upload previous assignments (for interaction matrix)
-st.markdown("### 📂 Upload Prior Course Groupings (Optional)")
-prior_csv = st.file_uploader("Upload prior course grouping CSV (Course, Group, Student)", type=["csv"])
+
+prior_csv = st.file_uploader("📋 Upload prior course grouping CSV (Course, Group, Student)", type=["csv"])
 
 interaction_matrix = None
 if num_students > 0:
