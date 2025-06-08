@@ -1,6 +1,6 @@
-# app.py
 import streamlit as st
 import pandas as pd
+import numpy as np
 import os
 from datetime import datetime
 from scheduler import run_scheduler_single_course
@@ -8,124 +8,117 @@ from scheduler import run_scheduler_single_course
 st.set_page_config(page_title="SAASS Scheduler", layout="wide")
 st.title("SAASS Scheduler (NEOS-Backed Optimization)")
 
-# ---------------------------------------------------------
-# 📝 Instructions and CSV guidance
-st.markdown("""
-Welcome to the **SAASS Scheduler**.
+# -----------------------------------------------
+# 📄 File upload and student count
+uploaded_roster = st.file_uploader("📋 Upload the student roster CSV (Student Name, Job Type)", type=["csv"])
+num_students = st.number_input("👥 Total number of students", min_value=1, max_value=100, value=45)
 
-This tool assigns students to balanced course groups using optimization submitted to the [NEOS Server](https://neos-server.org).
+# -----------------------------------------------
+# 🧮 Group size selection
+num_groups = st.number_input("🔢 How many groups do you want to form?", min_value=2, max_value=20, value=4)
 
----
+# Recommended group sizes
+recommended = [num_students // num_groups + (1 if i < num_students % num_groups else 0) for i in range(num_groups)]
 
-### What You'll Need
+st.markdown("### ✏️ Group Sizes (editable)")
+group_sizes_input = []
+override_warning = False
+total_assigned = 0
 
-Upload a `.csv` file with the following **two columns**, with these exact headers:
+cols = st.columns(num_groups)
+for i in range(num_groups):
+    with cols[i]:
+        val = st.number_input(f"Group {i + 1}", min_value=1, max_value=num_students, value=recommended[i], key=f"gsize_{i}")
+        group_sizes_input.append(val)
+        total_assigned += val
 
-| Student Name | Job Type |
-|--------------|----------|
-| Jenkins-P    | 15A      |
-| Brown-D      | 21A      |
-| Taylor-J     | Civ      |
-| Jones-P      | Army     |
-| Carter-X     | Marine   |
+if total_assigned != num_students:
+    st.warning(f"⚠️ Total group sizes ({total_assigned}) do not match number of students ({num_students}).")
 
----
+# -----------------------------------------------
+# 📂 Upload previous assignments (for interaction matrix)
+st.markdown("### 📂 Upload Prior Course Groupings (Optional)")
+prior_csv = st.file_uploader("Upload prior course grouping CSV (Course, Group, Student)", type=["csv"])
 
-### Formatting Guidelines (Important)
+interaction_matrix = None
+student_names = []
+job_types = []
 
-- **Student Name** must follow the format: `LastName-FirstInitial` (no spaces).
-- **Job Type** must be labeled **consistently**:
-  - Use `"Marine"`, `"Army"`, or `"Civ"` for non-Air Force students (case-sensitive).
-  - Use consistent formatting for all AFSCs (e.g., `"15A"`, not `"15-A"` or `"Ops Research"`).
-- Do **not** include extra columns or blank rows.
-- A valid **email address is required**, as the NEOS server uses it to run the optimization.
+# Process roster if available
+if uploaded_roster:
+    df_roster = pd.read_csv(uploaded_roster)
+    if "Student Name" not in df_roster.columns or "Job Type" not in df_roster.columns:
+        st.error("❌ CSV must include 'Student Name' and 'Job Type' columns.")
+    else:
+        student_names = df_roster["Student Name"].tolist()
+        job_types = df_roster["Job Type"].tolist()
 
----
-""")
+        name_to_index = {name: i for i, name in enumerate(student_names)}
+        interaction_matrix = np.zeros((num_students, num_students), dtype=int)
 
-# ✅ Optional download: sample file
-if os.path.exists("sample_roster.csv"):
-    with open("sample_roster.csv", "rb") as f:
-        st.download_button(
-            label="📥 Download Example CSV File",
-            data=f,
-            file_name="sample_roster.csv",
-            mime="text/csv"
-        )
+        if prior_csv:
+            df_prior = pd.read_csv(prior_csv)
+            if not {"Course", "Group", "Student"}.issubset(df_prior.columns):
+                st.error("❌ Prior grouping CSV must have columns: Course, Group, Student")
+            else:
+                grouped = df_prior.groupby(["Course", "Group"])
+                for _, group in grouped:
+                    students = group["Student"].tolist()
+                    for i in range(len(students)):
+                        for j in range(i + 1, len(students)):
+                            si, sj = students[i], students[j]
+                            if si in name_to_index and sj in name_to_index:
+                                a, b = name_to_index[si], name_to_index[sj]
+                                interaction_matrix[a, b] += 1
+                                interaction_matrix[b, a] += 1
+                            else:
+                                st.warning(f"⚠️ Student '{si}' or '{sj}' in prior group not found in roster. Ignored.")
 
-# ✅ Input fields
-email = st.text_input("Enter a valid email address:")
-uploaded_file = st.file_uploader("Upload the SAASS student roster CSV", type=["csv"])
-
-course_number = st.number_input("Enter Course Number (e.g., 600):", min_value=100, max_value=999, step=1, value=600)
+# -----------------------------------------------
+# 🎛️ Model parameters
+st.markdown("### ⚙️ Optimization Settings")
+email = st.text_input("Enter your email (required for NEOS):")
+course_number = st.number_input("Course number to assign (e.g., 600)", min_value=100, max_value=999, step=1, value=600)
 job_type_limit = st.number_input("Max students per job type in each group:", min_value=1, max_value=10, value=2)
 penalty_threshold = st.number_input("Penalty threshold (pairs beyond this will be penalized):", min_value=1, max_value=10, value=3)
 max_interaction = st.number_input("Maximum allowed interactions between any student pair:", min_value=1, max_value=10, value=4)
 
-# ✅ Session state init
-if "opt_run" not in st.session_state:
-    st.session_state.opt_run = False
-if "uploaded" not in st.session_state:
-    st.session_state.uploaded = None
+# -----------------------------------------------
+# 🚀 Trigger optimization
+if st.button("🚀 Run Optimization") and email and uploaded_roster and len(group_sizes_input) == num_groups:
+    if total_assigned != num_students:
+        st.error("❌ Group sizes must add up to total number of students.")
+    else:
+        try:
+            with st.status("Running optimization...", expanded=True) as status:
+                def show_step(msg):
+                    st.write(msg)
 
-# ✅ Store uploaded file in session to allow reset
-if uploaded_file:
-    st.session_state.uploaded = uploaded_file
+                st.write("📡 Submitting job to NEOS server...")
+                progress_bar = st.progress(0.0)
 
-# ✅ Run-time Disclaimer
-st.info("""
-This version of the app solves **only one course at a time**.  
-You can select which course to solve and customize interaction and job constraints above.  
-Expected runtime: **1–10 minutes**, depending on NEOS server load.
-""")
+                timestamp = datetime.now().strftime("%Y-%m-%d_%H%M")
+                output_filename = f"SAASS_Scheduler_{course_number}_{timestamp}.xlsx"
 
-# ✅ Buttons in a row
-col1, col2 = st.columns([1, 1])
-with col1:
-    if st.button("🚀 Start Optimization"):
-        st.session_state.opt_run = True
+                output_file = run_scheduler_single_course(
+                    df=pd.DataFrame({"Student Name": student_names, "Job Type": job_types}),
+                    course_num=course_number,
+                    email=email,
+                    group_sizes=group_sizes_input,
+                    interaction_matrix=interaction_matrix,
+                    job_type_limit=job_type_limit,
+                    penalty_threshold=penalty_threshold,
+                    max_interaction=max_interaction,
+                    progress_callback=show_step,
+                    progress_bar=progress_bar,
+                    output_filename=output_filename
+                )
 
-# ✅ Run if ready and triggered
-if email and st.session_state.uploaded and st.session_state.opt_run:
-    try:
-        with st.status("Running optimization...", expanded=True) as status:
-            def show_step(msg):
-                st.write(msg)
+                status.update(label="✅ Optimization complete!", state="complete")
 
-            st.write("📄 Reading uploaded CSV...")
-            df = pd.read_csv(st.session_state.uploaded)
+            st.success("✅ Optimization complete! Download your results below:")
+            with open(output_file, "rb") as f:
+                st.download_button("📊 Download Excel Summary", f, file_name=output_filename)
 
-            st.write("📡 Submitting job to NEOS server...")
-            progress_bar = st.progress(0.0)
-
-            timestamp = datetime.now().strftime("%Y-%m-%d_%H%M")
-            output_filename = f"SAASS_Scheduler_{course_number}_{timestamp}.xlsx"
-
-            output_file = run_scheduler_single_course(
-                df=df,
-                course_num=course_number,
-                email=email,
-                job_type_limit=job_type_limit,
-                penalty_threshold=penalty_threshold,
-                max_interaction=max_interaction,
-                progress_callback=show_step,
-                progress_bar=progress_bar,
-                output_filename=output_filename
-            )
-
-            status.update(label="✅ Optimization complete!", state="complete")
-            st.session_state.opt_run = False
-
-        st.success("✅ Optimization complete! Download your results below:")
-
-        with open(output_filename, "rb") as f:
-            st.download_button("📊 Download Excel Summary", f, file_name=output_filename)
-
-        if os.path.exists("Heatmap_Final.png"):
-            st.image("Heatmap_Final.png", caption="Final Interaction Matrix", use_container_width=True)
-        if os.path.exists("InteractionBar_Final.png"):
-            st.image("InteractionBar_Final.png", caption="Total Distinct Pairings per Student", use_container_width=True)
-
-    except Exception as e:
-        st.error(f"Something went wrong: {str(e)}")
-        st.session_state.opt_run = False
+        except Exception as e:
+            st.error(f"❌ An error occurred: {str(e)}")
