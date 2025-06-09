@@ -43,9 +43,9 @@ This tool uses mathematical optimization to assign students to course groups in 
 - **Penalty weight**: Strength of penalty applied to excess pairings  
 - **Maximum allowed pairings**: Hard cap on pair interactions 
 - **Solver time limit**: Max runtime for the NEOS optimization solver
-
-""")
 ---
+""")
+
 
 
 # --- Required Roster CSV ---
