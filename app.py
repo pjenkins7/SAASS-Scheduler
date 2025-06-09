@@ -11,11 +11,11 @@ st.set_page_config(page_title="SAASS Scheduler", layout="wide")
 
 from PIL import Image
 
-# Load and display the SAASS logo
-logo_path = "saasslogo1.png"  
+logo_path = "saasslogo1.png"
 if os.path.exists(logo_path):
     logo = Image.open(logo_path)
-    st.image(logo, width=150) 
+    st.image(logo, output_format="PNG")
+
 
 st.title("SAASS Scheduler")
 
