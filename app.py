@@ -18,6 +18,38 @@ Welcome to the **SAASS Scheduler**.
 This tool assigns students to balanced course groups using optimization submitted to the [NEOS Server](https://neos-server.org).
 
 ---
+st.markdown("""
+---
+
+### 🎯 SAASS Scheduling Problem Overview
+
+This tool uses mathematical optimization to assign students to course groups in a way that balances interaction and fairness.
+
+**📌 Decision:**  
+- Assign each student to a group within the course.
+
+**🎯 Objectives:**  
+1. Maximize the number of unique student pairs who are grouped together at least once (promoting interaction).
+2. Minimize the number of student pairs who are grouped together *too frequently*, above a user-defined **penalty threshold**.
+
+**✅ Constraints:**  
+- Each group must contain a specified number of students.
+- No group can exceed a set number of students from the same **job type**.
+- No student pair may be grouped together more than the **maximum allowed interactions**.
+
+**⚙️ User-defined Inputs:**  
+- **Penalty threshold** (how many times a pair can be grouped before it is penalized)
+- **Penalty weight** (how strongly to penalize repeat pairings)
+- **Job type limit** per group
+- **Maximum allowed pairings**
+- **Number and size of groups**
+- **Course number**
+- **Solver time limit**
+
+This optimization is solved on the [NEOS Server](https://neos-server.org) using CPLEX.
+
+---
+""")
 
 ### 🗂️ Required Roster CSV (All Users)
 
