@@ -47,10 +47,13 @@ This tool uses mathematical optimization to assign students to course groups in 
 """)
 
 
+# ---------------------------------------------------------
+# Upload Required Input Files
+st.markdown("## Upload Input Files")
 
 # --- Required Roster CSV ---
-st.markdown("### Required Roster CSV")
-roster_cols = st.columns([3, 1])
+st.markdown("### Roster CSV (Required)")
+roster_cols = st.columns([5, 1])
 
 with roster_cols[0]:
     st.markdown("""
@@ -63,8 +66,8 @@ Upload a `.csv` file with exactly **two columns**:
 | Taylor-J     | Civ      |
 
 **Formatting Rules:**
-- `Student Name` format must be `LastName-FirstInitial` (no spaces).
-- `Job Type` must be consistent (e.g., always use `"15A"`, not `"15-A"` or `"15a"`).
+- `Student Name` must be formatted as `LastName-FirstInitial` (no spaces).
+- `Job Type` must be consistent (e.g., always `"15A"`, not `"15-A"` or `"15a"`).
 - Use `"Marine"`, `"Army"`, or `"Civ"` for non-Air Force roles.
 - Do **not** include extra columns or blank rows.
 """)
@@ -72,17 +75,15 @@ Upload a `.csv` file with exactly **two columns**:
 with roster_cols[1]:
     if os.path.exists("sample_roster.csv"):
         with open("sample_roster.csv", "rb") as f:
-            st.download_button("📥 Download Example Roster CSV", f, file_name="sample_roster.csv")
-
+            st.download_button(" Download Example Roster CSV", f, file_name="sample_roster.csv")
 
 # --- Prior Grouping CSV ---
-st.markdown("---")
 st.markdown("### Prior Grouping CSV (Optional)")
-prior_cols = st.columns([3, 1])
+prior_cols = st.columns([5, 1])
 
 with prior_cols[0]:
     st.markdown("""
-If prior courses have been completed, upload a `.csv` file with previous groupings to guide the model’s interaction penalties.
+If you’ve already grouped students in previous courses, upload a `.csv` file with historical assignments to help guide the optimization.
 
 | Course | Group | Student     |
 |--------|-------|-------------|
@@ -92,23 +93,18 @@ If prior courses have been completed, upload a `.csv` file with previous groupin
 
 **Formatting Rules:**
 - `Course`: Integer (e.g., 1, 2, 3)
-- `Group`: Group number for that course (starts at 1)
-- `Student`: Must match roster names exactly
+- `Group`: Group number within the course (starts at 1)
+- `Student`: Must match names from the roster **exactly**
 
-**Note**: A mismatch in student names will cause that record to be ignored.
+**Note**: Mismatches will be ignored during optimization.
 """)
 
 with prior_cols[1]:
     if os.path.exists("sample_prior_assignments.csv"):
         with open("sample_prior_assignments.csv", "rb") as f:
-            st.download_button("📥 Download Example Prior Grouping CSV", f, file_name="sample_prior_assignments.csv")
+            st.download_button(" Download Example Prior Grouping CSV", f, file_name="sample_prior_assignments.csv")
 
-
-
-
-
-
-# Upload roster
+# --- File Uploader for Roster ---
 uploaded_roster = st.file_uploader("Upload Roster CSV", type=["csv"])
 
 student_names = []
@@ -120,9 +116,10 @@ if uploaded_roster:
         student_names = df_roster["Student Name"].tolist()
         job_types = df_roster["Job Type"].tolist()
         num_students = len(student_names)
-        st.success(f"{num_students} students loaded.")
+        st.success(f"{num_students} students loaded from roster.")
     else:
-        st.error("CSV must include 'Student Name' and 'Job Type' columns.")
+        st.error("⚠️ The CSV must include the columns 'Student Name' and 'Job Type'.")
+
 
 # Group sizes
 if num_students > 0:
