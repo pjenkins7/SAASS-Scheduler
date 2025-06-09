@@ -11,45 +11,42 @@ st.set_page_config(page_title="SAASS Scheduler", layout="wide")
 st.title("SAASS Scheduler (NEOS-Backed Optimization)")
 
 # ---------------------------------------------------------
-# 📘 Full Instructions and CSV Guidance
+# 📘 Intro and Model Overview
 st.markdown("""
 Welcome to the **SAASS Scheduler**.
 
 This tool assigns students to balanced course groups using optimization submitted to the [NEOS Server](https://neos-server.org).
 
 ---
-st.markdown("""
----
 
 ### 🎯 SAASS Scheduling Problem Overview
 
 This tool uses mathematical optimization to assign students to course groups in a way that balances interaction and fairness.
 
-**📌 Decision:**  
-- Assign each student to a group within the course.
+**📌 Decision Variable:**  
+- For each course, assign every student to exactly one group.
 
 **🎯 Objectives:**  
-1. Maximize the number of unique student pairs who are grouped together at least once (promoting interaction).
-2. Minimize the number of student pairs who are grouped together *too frequently*, above a user-defined **penalty threshold**.
+1. Maximize the number of unique student pairs who are grouped together at least once (promoting interaction).  
+2. Minimize the number of student pairs assigned together more than a user-defined **penalty threshold**.
 
 **✅ Constraints:**  
-- Each group must contain a specified number of students.
-- No group can exceed a set number of students from the same **job type**.
+- Each group must contain a specified number of students.  
+- No group may exceed a specified number of students from the same **job type**.  
 - No student pair may be grouped together more than the **maximum allowed interactions**.
 
 **⚙️ User-defined Inputs:**  
-- **Penalty threshold** (how many times a pair can be grouped before it is penalized)
-- **Penalty weight** (how strongly to penalize repeat pairings)
-- **Job type limit** per group
-- **Maximum allowed pairings**
-- **Number and size of groups**
-- **Course number**
-- **Solver time limit**
+- **Penalty threshold**: Max interactions before a student pair is penalized  
+- **Penalty weight**: Strength of penalty applied to excess pairings  
+- **Max job type per group**: Limits per-job-type distribution  
+- **Maximum allowed pairings**: Hard cap on pair interactions  
+- **Group structure**: Number and size of groups  
+- **Course number**: For tracking across multiple course runs  
+- **Solver time limit**: Max runtime for the NEOS optimization solver
 
-This optimization is solved on the [NEOS Server](https://neos-server.org) using CPLEX.
+This optimization is solved using **CPLEX** on the [NEOS Server](https://neos-server.org).
 
 ---
-""")
 
 ### 🗂️ Required Roster CSV (All Users)
 
@@ -80,12 +77,13 @@ If prior courses have been completed, upload a CSV with **previous groupings** t
 | 1      | 2     | Taylor-J    |
 
 #### Prior CSV Formatting Rules:
-- `Course`: Integer (e.g., 1, 2, 3)
-- `Group`: Group number for that course (starts at 1)
+- `Course`: Integer (e.g., 1, 2, 3)  
+- `Group`: Group number for that course (starts at 1)  
 - `Student`: Must match roster names exactly
 
 💡 A mismatch in student names will cause that record to be ignored.
 """)
+
 
 # Optional sample download
 if os.path.exists("sample_roster.csv"):
