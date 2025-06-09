@@ -8,7 +8,16 @@ from datetime import datetime
 from scheduler import run_scheduler_single_course
 
 st.set_page_config(page_title="SAASS Scheduler", layout="wide")
-st.title("SAASS Scheduler (NEOS-Backed Optimization)")
+
+from PIL import Image
+
+# Load and display the SAASS logo
+logo_path = "saasslogo1.png"  # Make sure this path matches the uploaded filename
+if os.path.exists(logo_path):
+    logo = Image.open(logo_path)
+    st.image(logo, width=150)  # You can adjust width if needed
+
+st.title("SAASS Scheduler")
 
 # ---------------------------------------------------------
 # Intro and Model Overview
