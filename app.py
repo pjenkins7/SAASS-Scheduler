@@ -11,31 +11,31 @@ st.set_page_config(page_title="SAASS Scheduler", layout="wide")
 st.title("SAASS Scheduler (NEOS-Backed Optimization)")
 
 # ---------------------------------------------------------
-# 📘 Intro and Model Overview
+# Intro and Model Overview
 st.markdown("""
 Welcome to the **SAASS Scheduler**.
 
-This tool assigns students to balanced course groups using optimization submitted to the [NEOS Server](https://neos-server.org).
+This tool assigns students to balanced course groups using mathematical optimization submitted to the [NEOS Server](https://neos-server.org), where it is solved using **CPLEX**. To submit a job to NEOS, you must provide an **email address** — this is required by NEOS for job submission. While NEOS will send you a confirmation and solution output via email, **you can safely ignore it**: all results are returned directly in this app.
 
 ---
 
-### 🎯 SAASS Scheduling Problem Overview
+### SAASS Scheduling Problem Overview
 
 This tool uses mathematical optimization to assign students to course groups in a way that balances interaction and fairness.
 
-**📌 Decision Variable:**  
+**Decision Variable:**  
 - For each course, assign every student to exactly one group.
 
-**🎯 Objectives:**  
+**Objectives:**  
 1. Maximize the number of unique student pairs who are grouped together at least once (promoting interaction).  
 2. Minimize the number of student pairs assigned together more than a user-defined **penalty threshold**.
 
-**✅ Constraints:**  
+**Constraints:**  
 - Each group must contain a specified number of students.  
 - No group may exceed a specified number of students from the same **job type**.  
 - No student pair may be grouped together more than the **maximum allowed interactions**.
 
-**⚙️ User-defined Inputs:**  
+**User-defined Inputs:**  
 - **Penalty threshold**: Max interactions before a student pair is penalized  
 - **Penalty weight**: Strength of penalty applied to excess pairings  
 - **Max job type per group**: Limits per-job-type distribution  
@@ -44,23 +44,10 @@ This tool uses mathematical optimization to assign students to course groups in 
 - **Course number**: For tracking across multiple course runs  
 - **Solver time limit**: Max runtime for the NEOS optimization solver
 
-This optimization is solved using **CPLEX** on the [NEOS Server](https://neos-server.org).
-
 ---
 
-### 📧 NEOS Email Requirement
 
-To use the NEOS solver, you must provide an **email address**.  
-- This is required by NEOS for job submission.  
-- NEOS will email you the optimization output, but **you can safely ignore that email** — all results are returned directly in the app.
-
----
-
-# 📘 CSV Guidance + Inline Downloads
-
----
-
-### 🗂️ Required Roster CSV (All Users)
+### Required Roster CSV
 
 Upload a `.csv` file with exactly **two columns**:
 
@@ -84,7 +71,7 @@ st.markdown("""
 
 ---
 
-### 📘 Optional Prior Grouping CSV (for Interaction Awareness)
+### Prior Grouping CSV
 
 If prior courses have been completed, upload a CSV with **previous groupings** to guide the model’s interaction penalties.
 
@@ -104,7 +91,7 @@ st.markdown("""
 - `Group`: Group number for that course (starts at 1)  
 - `Student`: Must match roster names exactly
 
-💡 A mismatch in student names will cause that record to be ignored.
+**Note**: A mismatch in student names will cause that record to be ignored.
 """)
 
 
