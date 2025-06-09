@@ -186,6 +186,8 @@ if num_students > 0:
         else:
             st.error("Prior grouping CSV must include columns: Course, Group, Student")
 
+st.markdown("""
+---""")
 # Optimization parameters
 st.markdown("### Optimization Settings")
 
