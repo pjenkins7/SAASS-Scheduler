@@ -14,7 +14,7 @@ from PIL import Image
 logo_path = "saasslogo1.png"
 if os.path.exists(logo_path):
     logo = Image.open(logo_path)
-    st.image(logo, output_format="PNG")
+    st.image(logo, output_format="PNG", width=150)
 
 
 st.title("SAASS Scheduler")
