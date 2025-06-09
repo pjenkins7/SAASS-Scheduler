@@ -15,7 +15,7 @@ st.title("SAASS Scheduler (NEOS-Backed Optimization)")
 st.markdown("""
 Welcome to the **SAASS Scheduler**.
 
-This tool assigns students to balanced course groups using mathematical optimization submitted to the [NEOS Server](https://neos-server.org), where it is solved using **CPLEX**. To submit a job to NEOS, you must provide an **email address** — this is required by NEOS for job submission. While NEOS will send you a confirmation and solution output via email, **you can safely ignore it**: all results are returned directly in this app.
+This tool assigns students to balanced course groups using mathematical optimization submitted to the [NEOS Server](https://neos-server.org), where it is solved using **CPLEX**. To submit a job to NEOS, you must provide an **email address** (this is required by NEOS for job submission). While NEOS will send you a confirmation and solution output via email, **you can safely ignore it** (all results are returned directly in this app).
 
 ---
 
@@ -36,12 +36,12 @@ This tool uses mathematical optimization to assign students to course groups in 
 - No student pair may be grouped together more than the **maximum allowed interactions**.
 
 **User-defined Inputs:**  
+- **Course number**: For tracking across multiple course runs
+- **Group structure**: Number and size of groups 
+- **Max job type per group**: Limits per-job-type distribution
 - **Penalty threshold**: Max interactions before a student pair is penalized  
 - **Penalty weight**: Strength of penalty applied to excess pairings  
-- **Max job type per group**: Limits per-job-type distribution  
-- **Maximum allowed pairings**: Hard cap on pair interactions  
-- **Group structure**: Number and size of groups  
-- **Course number**: For tracking across multiple course runs  
+- **Maximum allowed pairings**: Hard cap on pair interactions 
 - **Solver time limit**: Max runtime for the NEOS optimization solver
 
 ---
@@ -154,7 +154,7 @@ if num_students > 0:
 # Optimization parameters
 st.markdown("### Optimization Settings")
 email = st.text_input("Email (required for NEOS)")
-course_number = st.number_input("Course number to assign", min_value=1, value=suggested_course)
+course_number = st.number_input("Course number", min_value=1, value=suggested_course)
 job_type_limit = st.number_input("Max per job type per group", min_value=1, value=2)
 penalty_threshold = st.number_input("Penalty threshold (interactions)", min_value=1, value=3)
 penalty_weight = st.number_input("Penalty weight (penalty per repeat interaction after penalty threshold)", min_value=0.0, value=0.25, step=0.1)
