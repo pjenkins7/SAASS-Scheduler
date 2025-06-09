@@ -126,6 +126,7 @@ email = st.text_input("Email (required for NEOS)")
 course_number = st.number_input("Course number to assign", min_value=1, value=suggested_course)
 job_type_limit = st.number_input("Max per job type per group", min_value=1, value=2)
 penalty_threshold = st.number_input("Penalty threshold (interactions)", min_value=1, value=3)
+penalty_weight = st.number_input("Penalty weight (penalty per repeat interaction after penalty threshold)", min_value=0.0, value=0.25, step=0.1)
 max_interaction = st.number_input("Max allowed interactions", min_value=1, value=4)
 time_limit = st.number_input("Solver time limit (seconds)", min_value=10, max_value=3600, value=30)
 
@@ -161,6 +162,7 @@ if st.button("Run Optimization") and email and uploaded_roster and num_students 
                     interaction_matrix=interaction_matrix,
                     job_type_limit=job_type_limit,
                     penalty_threshold=penalty_threshold,
+                    penalty_weight=penalty_weight,
                     max_interaction=max_interaction,
                     time_limit=time_limit,
                     progress_callback=show_step,
