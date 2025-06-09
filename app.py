@@ -305,49 +305,49 @@ if "all_assignments" in st.session_state and "new_assignments" in st.session_sta
                     interaction_vis_matrix.loc[members[i], members[j]] += 1
                     interaction_vis_matrix.loc[members[j], members[i]] += 1
 
-# Heatmap
-st.markdown("### Heatmap of Total Student Interactions")
-heatmap_data = interaction_vis_matrix.copy()
-heatmap_array = heatmap_data.to_numpy(dtype=float, copy=True)
-if heatmap_array.shape[0] == heatmap_array.shape[1]:
-    np.fill_diagonal(heatmap_array, np.nan)
-
-fig3, ax3 = plt.subplots(figsize=(20, 16))  # Increased size
-sns.heatmap(
-    heatmap_array,
-    cmap="Reds",
-    annot=True,
-    fmt=".0f",
-    linewidths=0.5,
-    linecolor='gray',
-    ax=ax3,
-    annot_kws={"size": 6},  # Smaller annotation text
-    cbar_kws={'label': 'Times Paired'},
-    xticklabels=heatmap_data.columns,
-    yticklabels=heatmap_data.index
-)
-ax3.tick_params(axis='x', labelsize=8, rotation=90)
-ax3.tick_params(axis='y', labelsize=8)
-st.pyplot(fig3)
-
-# Distinct pairings
-pairwise_partners = {s: set() for s in all_students}
-for i in range(len(all_students)):
-    for j in range(len(all_students)):
-        if i != j and interaction_vis_matrix.iloc[i, j] > 0:
-            pairwise_partners[all_students[i]].add(all_students[j])
-distinct_counts = pd.Series({s: len(p) for s, p in pairwise_partners.items()}).sort_values()
-
-st.markdown("### Distinct Pairings per Student")
-fig, ax = plt.subplots(figsize=(12, 18))  # Taller and wider
-bars = ax.barh(distinct_counts.index, distinct_counts.values, color='skyblue')
-ax.set_xlabel("Number of Unique Students Paired With", fontsize=12)
-ax.tick_params(axis='y', labelsize=8)
-ax.tick_params(axis='x', labelsize=10)
-for bar in bars:
-    ax.text(bar.get_width() + 0.5, bar.get_y() + bar.get_height() / 2,
-            str(int(bar.get_width())), va='center', fontsize=8)
-st.pyplot(fig)
+    # Heatmap
+    st.markdown("### Heatmap of Total Student Interactions")
+    heatmap_data = interaction_vis_matrix.copy()
+    heatmap_array = heatmap_data.to_numpy(dtype=float, copy=True)
+    if heatmap_array.shape[0] == heatmap_array.shape[1]:
+        np.fill_diagonal(heatmap_array, np.nan)
+    
+    fig3, ax3 = plt.subplots(figsize=(20, 16))  # Increased size
+    sns.heatmap(
+        heatmap_array,
+        cmap="Reds",
+        annot=True,
+        fmt=".0f",
+        linewidths=0.5,
+        linecolor='gray',
+        ax=ax3,
+        annot_kws={"size": 6},  # Smaller annotation text
+        cbar_kws={'label': 'Times Paired'},
+        xticklabels=heatmap_data.columns,
+        yticklabels=heatmap_data.index
+    )
+    ax3.tick_params(axis='x', labelsize=8, rotation=90)
+    ax3.tick_params(axis='y', labelsize=8)
+    st.pyplot(fig3)
+    
+    # Distinct pairings
+    pairwise_partners = {s: set() for s in all_students}
+    for i in range(len(all_students)):
+        for j in range(len(all_students)):
+            if i != j and interaction_vis_matrix.iloc[i, j] > 0:
+                pairwise_partners[all_students[i]].add(all_students[j])
+    distinct_counts = pd.Series({s: len(p) for s, p in pairwise_partners.items()}).sort_values()
+    
+    st.markdown("### Distinct Pairings per Student")
+    fig, ax = plt.subplots(figsize=(12, 18))  # Taller and wider
+    bars = ax.barh(distinct_counts.index, distinct_counts.values, color='skyblue')
+    ax.set_xlabel("Number of Unique Students Paired With", fontsize=12)
+    ax.tick_params(axis='y', labelsize=8)
+    ax.tick_params(axis='x', labelsize=10)
+    for bar in bars:
+        ax.text(bar.get_width() + 0.5, bar.get_y() + bar.get_height() / 2,
+                str(int(bar.get_width())), va='center', fontsize=8)
+    st.pyplot(fig)
 
 
     # Histogram of pairwise frequencies
