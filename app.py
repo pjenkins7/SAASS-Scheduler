@@ -44,7 +44,14 @@ This tool uses mathematical optimization to assign students to course groups in 
 - **Maximum allowed pairings**: Hard cap on pair interactions 
 - **Solver time limit**: Max runtime for the NEOS optimization solver
 
+""")
 ---
+
+
+
+# --- Required Roster CSV ---
+st.markdown("### Required Roster CSV")
+
 
 
 # --- Required Roster CSV ---
