@@ -47,8 +47,12 @@ This tool uses mathematical optimization to assign students to course groups in 
 ---
 
 
-### Required Roster CSV
+# --- Required Roster CSV ---
+st.markdown("### Required Roster CSV")
+roster_cols = st.columns([3, 1])
 
+with roster_cols[0]:
+    st.markdown("""
 Upload a `.csv` file with exactly **two columns**:
 
 | Student Name | Job Type |
@@ -57,42 +61,50 @@ Upload a `.csv` file with exactly **two columns**:
 | Brown-D      | 21A      |
 | Taylor-J     | Civ      |
 
-""")
-if os.path.exists("sample_roster.csv"):
-    with open("sample_roster.csv", "rb") as f:
-        st.download_button("📥 Download Example Roster CSV", f, file_name="sample_roster.csv")
-
-st.markdown("""
-#### Roster Formatting Rules:
+**Formatting Rules:**
 - `Student Name` format must be `LastName-FirstInitial` (no spaces).
 - `Job Type` must be consistent (e.g., always use `"15A"`, not `"15-A"` or `"15a"`).
 - Use `"Marine"`, `"Army"`, or `"Civ"` for non-Air Force roles.
 - Do **not** include extra columns or blank rows.
+""")
 
----
+with roster_cols[1]:
+    if os.path.exists("sample_roster.csv"):
+        with open("sample_roster.csv", "rb") as f:
+            st.download_button("📥 Download Example Roster CSV", f, file_name="sample_roster.csv")
 
-### Prior Grouping CSV
 
-If prior courses have been completed, upload a CSV with **previous groupings** to guide the model’s interaction penalties.
+# --- Prior Grouping CSV ---
+st.markdown("---")
+st.markdown("### Prior Grouping CSV (Optional)")
+prior_cols = st.columns([3, 1])
+
+with prior_cols[0]:
+    st.markdown("""
+If prior courses have been completed, upload a `.csv` file with previous groupings to guide the model’s interaction penalties.
 
 | Course | Group | Student     |
 |--------|-------|-------------|
 | 1      | 1     | Jenkins-P   |
 | 1      | 1     | Brown-D     |
 | 1      | 2     | Taylor-J    |
-""")
-if os.path.exists("sample_prior_assignments.csv"):
-    with open("sample_prior_assignments.csv", "rb") as f:
-        st.download_button("📥 Download Example Prior Grouping CSV", f, file_name="sample_prior_assignments.csv")
 
-st.markdown("""
-#### Prior CSV Formatting Rules:
-- `Course`: Integer (e.g., 1, 2, 3)  
-- `Group`: Group number for that course (starts at 1)  
+**Formatting Rules:**
+- `Course`: Integer (e.g., 1, 2, 3)
+- `Group`: Group number for that course (starts at 1)
 - `Student`: Must match roster names exactly
 
 **Note**: A mismatch in student names will cause that record to be ignored.
 """)
+
+with prior_cols[1]:
+    if os.path.exists("sample_prior_assignments.csv"):
+        with open("sample_prior_assignments.csv", "rb") as f:
+            st.download_button("📥 Download Example Prior Grouping CSV", f, file_name="sample_prior_assignments.csv")
+
+
+
+
 
 
 # Upload roster
