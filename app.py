@@ -48,6 +48,14 @@ This optimization is solved using **CPLEX** on the [NEOS Server](https://neos-se
 
 ---
 
+### 📧 NEOS Email Requirement
+
+To use the NEOS solver, you must provide an **email address**.  
+- This is required by NEOS for job submission.  
+- NEOS will email you the optimization output, but **you can safely ignore that email** — all results are returned directly in the app.
+
+---
+
 ### 🗂️ Required Roster CSV (All Users)
 
 Upload a `.csv` file with exactly **two columns**:
