@@ -27,7 +27,7 @@ with intro_col:
     """)
 
 with logo_col:
-    st.image(logo, use_container_width=True)
+    st.image(logo, use_container_width=0.5)
 
 
 
