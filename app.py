@@ -48,12 +48,6 @@ This tool uses mathematical optimization to assign students to course groups in 
 ---
 
 
-
-# --- Required Roster CSV ---
-st.markdown("### Required Roster CSV")
-
-
-
 # --- Required Roster CSV ---
 st.markdown("### Required Roster CSV")
 roster_cols = st.columns([3, 1])
