@@ -16,7 +16,7 @@ logo_path = "saasslogo1.png"
 logo = Image.open(logo_path)
 
 # Two-column layout: text left, logo right
-intro_col, logo_col = st.columns([2, 1])
+intro_col, logo_col = st.columns([1, 2])
 
 with intro_col:
     st.title("SAASS Scheduler")
