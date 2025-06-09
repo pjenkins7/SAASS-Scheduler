@@ -15,8 +15,8 @@ from PIL import Image
 logo_path = "saasslogo1.png"
 logo = Image.open(logo_path)
 
-# Layout with columns
-intro_col, logo_col = st.columns([4, 1])
+# Two-column layout: text left, logo right
+intro_col, logo_col = st.columns([2, 1])
 
 with intro_col:
     st.title("SAASS Scheduler")
@@ -27,7 +27,8 @@ with intro_col:
     """)
 
 with logo_col:
-    st.image(logo, output_format="PNG", use_column_width=True)
+    st.image(logo, use_container_width=True)
+
 
 
 
