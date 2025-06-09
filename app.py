@@ -56,6 +56,10 @@ To use the NEOS solver, you must provide an **email address**.
 
 ---
 
+# 📘 CSV Guidance + Inline Downloads
+
+---
+
 ### 🗂️ Required Roster CSV (All Users)
 
 Upload a `.csv` file with exactly **two columns**:
@@ -66,6 +70,12 @@ Upload a `.csv` file with exactly **two columns**:
 | Brown-D      | 21A      |
 | Taylor-J     | Civ      |
 
+""")
+if os.path.exists("sample_roster.csv"):
+    with open("sample_roster.csv", "rb") as f:
+        st.download_button("📥 Download Example Roster CSV", f, file_name="sample_roster.csv")
+
+st.markdown("""
 #### Roster Formatting Rules:
 - `Student Name` format must be `LastName-FirstInitial` (no spaces).
 - `Job Type` must be consistent (e.g., always use `"15A"`, not `"15-A"` or `"15a"`).
@@ -83,7 +93,12 @@ If prior courses have been completed, upload a CSV with **previous groupings** t
 | 1      | 1     | Jenkins-P   |
 | 1      | 1     | Brown-D     |
 | 1      | 2     | Taylor-J    |
+""")
+if os.path.exists("sample_prior_assignments.csv"):
+    with open("sample_prior_assignments.csv", "rb") as f:
+        st.download_button("📥 Download Example Prior Grouping CSV", f, file_name="sample_prior_assignments.csv")
 
+st.markdown("""
 #### Prior CSV Formatting Rules:
 - `Course`: Integer (e.g., 1, 2, 3)  
 - `Group`: Group number for that course (starts at 1)  
@@ -92,15 +107,6 @@ If prior courses have been completed, upload a CSV with **previous groupings** t
 💡 A mismatch in student names will cause that record to be ignored.
 """)
 
-
-# Optional sample download
-if os.path.exists("sample_roster.csv"):
-    with open("sample_roster.csv", "rb") as f:
-        st.download_button("Download Example Roster CSV", f, file_name="sample_roster.csv")
-
-if os.path.exists("sample_prior_assignments.csv"):
-    with open("sample_prior_assignments.csv", "rb") as f:
-        st.download_button("Download Example Prior Grouping CSV", f, file_name="sample_prior_assignments.csv")
 
 # Upload roster
 uploaded_roster = st.file_uploader("Upload Roster CSV", type=["csv"])
