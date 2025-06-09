@@ -24,7 +24,6 @@ with intro_col:
     Welcome to the **SAASS Scheduler**.
 
     This tool assigns students to balanced course groups using mathematical optimization submitted to the [NEOS Server](https://neos-server.org), where it is solved using **CPLEX**. To submit a job to NEOS, you must provide an **email address** (this is required by NEOS for job submission). While NEOS will send you a confirmation and solution output via email, **you can safely ignore it** (all results are returned directly in this app).
-    ---
     """)
 
 with logo_col:
@@ -41,7 +40,8 @@ with logo_col:
 
 # This tool assigns students to balanced course groups using mathematical optimization submitted to the [NEOS Server](https://neos-server.org), where it is solved using **CPLEX**. To submit a job to NEOS, you must provide an **email address** (this is required by NEOS for job submission). While NEOS will send you a confirmation and solution output via email, **you can safely ignore it** (all results are returned directly in this app).
 
-# ---
+st.markdown("""
+---
 
 ### SAASS Scheduling Problem Overview
 
