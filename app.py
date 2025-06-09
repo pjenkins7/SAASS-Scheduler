@@ -11,20 +11,34 @@ st.set_page_config(page_title="SAASS Scheduler", layout="wide")
 
 from PIL import Image
 
+# Load logo image
 logo_path = "saasslogo1.png"
-if os.path.exists(logo_path):
-    logo = Image.open(logo_path)
-    st.image(logo, output_format="PNG", width=150)
+logo = Image.open(logo_path)
+
+# Layout with columns
+intro_col, logo_col = st.columns([4, 1])
+
+with intro_col:
+    st.title("SAASS Scheduler")
+    st.markdown("""
+    Welcome to the **SAASS Scheduler**.
+
+    This tool assigns students to balanced course groups using mathematical optimization submitted to the [NEOS Server](https://neos-server.org), where it is solved using **CPLEX**. To submit a job to NEOS, you must provide an **email address** (this is required by NEOS for job submission). While NEOS will send you a confirmation and solution output via email, **you can safely ignore it** (all results are returned directly in this app).
+    """)
+
+with logo_col:
+    st.image(logo, output_format="PNG", use_column_width=True)
 
 
-st.title("SAASS Scheduler")
 
-# ---------------------------------------------------------
-# Intro and Model Overview
-st.markdown("""
-Welcome to the **SAASS Scheduler**.
+# st.title("SAASS Scheduler")
 
-This tool assigns students to balanced course groups using mathematical optimization submitted to the [NEOS Server](https://neos-server.org), where it is solved using **CPLEX**. To submit a job to NEOS, you must provide an **email address** (this is required by NEOS for job submission). While NEOS will send you a confirmation and solution output via email, **you can safely ignore it** (all results are returned directly in this app).
+# # ---------------------------------------------------------
+# # Intro and Model Overview
+# st.markdown("""
+# Welcome to the **SAASS Scheduler**.
+
+# This tool assigns students to balanced course groups using mathematical optimization submitted to the [NEOS Server](https://neos-server.org), where it is solved using **CPLEX**. To submit a job to NEOS, you must provide an **email address** (this is required by NEOS for job submission). While NEOS will send you a confirmation and solution output via email, **you can safely ignore it** (all results are returned directly in this app).
 
 ---
 
