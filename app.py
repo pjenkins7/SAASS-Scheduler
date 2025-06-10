@@ -287,10 +287,34 @@ if "all_assignments" in st.session_state and "new_assignments" in st.session_sta
     with open(output_filename, "rb") as f:
         st.download_button("Download Excel Summary", f, file_name=output_filename)
 
+    # st.markdown("### New Groupings")
+    # for gnum in sorted(new_assignments["Group"].unique()):
+    #     st.markdown(f"**Group {gnum}**")
+    #     st.dataframe(new_assignments[new_assignments["Group"] == gnum][["Student"]].reset_index(drop=True))
+
     st.markdown("### New Groupings")
-    for gnum in sorted(new_assignments["Group"].unique()):
-        st.markdown(f"**Group {gnum}**")
-        st.dataframe(new_assignments[new_assignments["Group"] == gnum][["Student"]].reset_index(drop=True))
+
+    # Sort and format group labels
+    grouped = new_assignments.copy()
+    grouped = grouped.sort_values(by=["Group", "Student"])
+    grouped["Group"] = "Group " + grouped["Group"].astype(str)
+    
+    # Build a dictionary with group names as keys and student lists as values
+    group_dict = {
+        group: list(df["Student"]) for group, df in grouped.groupby("Group")
+    }
+    
+    # Pad each group with empty strings to make all columns the same length
+    max_len = max(len(students) for students in group_dict.values())
+    for group in group_dict:
+        group_dict[group] += [""] * (max_len - len(group_dict[group]))
+    
+    # Create a DataFrame from the dictionary
+    group_df = pd.DataFrame(group_dict)
+    
+    # Display the combined grouping table
+    st.dataframe(group_df)
+
 
     # 🧮 Rebuild interaction matrix for visualizations
     st.markdown("## Interaction Visualizations")
